@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prescriptions - PharmaSys</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --primary-color: #1E88E5;
+            --sidebar-width: 260px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F7FA;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        h1, h2, h3, .logo-font { font-family: 'Poppins', sans-serif; }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            background: white;
+            border-right: 1px solid #dee2e6;
+            z-index: 1000;
+        }
+
+        .nav-link {
+            color: #555;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 4px 15px;
+        }
+
+        .nav-link.active {
+            background-color: var(--primary-color);
+            color: white !important;
+        }
+
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Split View Layout */
+        .split-view {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .prescription-list-panel {
+            width: 380px;
+            background: white;
+            border-right: 1px solid #dee2e6;
+            overflow-y: auto;
+        }
+
+        .detail-panel {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        /* Custom Cards */
+        .presc-card {
+            border: 1px solid #eee;
+            border-left: 4px solid transparent;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .presc-card.active {
+            background-color: #F0F7FF;
+            border-left-color: var(--primary-color);
+            border-color: #d1e3f8;
+        }
+
+        .presc-image-viewer {
+            width: 100%;
+            height: 300px;
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #adb5bd;
+        }
+
+        @media (max-width: 992px) {
+            .sidebar { display: none; }
+            .main-wrapper { margin-left: 0; }
+            .prescription-list-panel { width: 300px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar d-flex flex-column shadow-sm">
+        <div class="p-4">
+            <h4 class="logo-font text-primary m-0">💊 PharmaSys</h4>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link" href="#"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
+            <a class="nav-link" href="#"><i class="bi bi-cart me-2"></i> POS (Sales)</a>
+            <a class="nav-link" href="#"><i class="bi bi-capsule me-2"></i> Medicines</a>
+            <a class="nav-link active" href="#"><i class="bi bi-file-earmark-medical me-2"></i> Prescriptions</a>
+            <a class="nav-link" href="#"><i class="bi bi-people me-2"></i> Employees</a>
+        </nav>
+    </div>
+
+    <div class="main-wrapper">
+        <header class="bg-white border-bottom p-3 d-flex justify-content-between align-items-center shadow-sm">
+            <h1 class="h5 fw-bold mb-0">Prescription Management</h1>
+            <button class="btn btn-outline-primary btn-sm fw-bold px-3">
+                <i class="bi bi-cloud-upload me-2"></i>Upload New
+            </button>
+        </header>
+
+        <div class="split-view">
+            <div class="prescription-list-panel p-3">
+                <div class="input-group mb-3">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control bg-light border-start-0" placeholder="Search patient or ID...">
+                </div>
+
+                <div class="list-group list-group-flush">
+                    <div class="presc-card active p-3 rounded-3 mb-2 shadow-sm">
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                            <span class="fw-bold text-dark">Ahmed Ali</span>
+                            <small class="text-muted">Today</small>
+                        </div>
+                        <div class="small text-secondary mb-1">Ref: <span class="text-primary">#PR-2041</span></div>
+                        <div class="small text-muted"><i class="bi bi-person-badge me-1"></i> Dr. Sarah Johnson</div>
+                    </div>
+
+                    <div class="presc-card p-3 rounded-3 mb-2">
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                            <span class="fw-bold text-dark">Maria Garcia</span>
+                            <small class="text-muted">Jan 03</small>
+                        </div>
+                        <div class="small text-secondary mb-1">Ref: <span class="text-primary">#PR-2038</span></div>
+                        <div class="small text-muted"><i class="bi bi-person-badge me-1"></i> Dr. Robert Wilson</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-panel">
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <h3 class="h4 mb-1">Prescription Details</h3>
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb mb-0 small">
+                                    <li class="breadcrumb-item">Ahmed Ali</li>
+                                    <li class="breadcrumb-item">34 Years</li>
+                                    <li class="breadcrumb-item active text-primary">Male</li>
+                                </ol>
+                            </nav>
+                        </div>
+                        <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill">Status: Pending</span>
+                    </div>
+
+                    <div class="presc-image-viewer mb-4">
+                        <i class="bi bi-file-earmark-image fs-1 mb-2"></i>
+                        <span class="fw-medium">Prescription Scan (PR-2041.jpg)</span>
+                        <button class="btn btn-link btn-sm text-decoration-none mt-2">View Fullscreen</button>
+                    </div>
+
+                    <h5 class="h6 fw-bold mb-3 border-bottom pb-2 text-uppercase text-muted small">Medicines Prescribed</h5>
+                    <div class="list-group list-group-flush mb-4">
+                        <div class="list-group-item px-0 border-0 mb-2">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <div class="fw-bold">Amoxicillin 500mg</div>
+                                    <small class="text-muted">10 Capsules (TDS for 5 days)</small>
+                                </div>
+                                <span class="text-primary fw-semibold">In Stock</span>
+                            </div>
+                        </div>
+                        <div class="list-group-item px-0 border-0 mb-2">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <div class="fw-bold">Panadol Extra</div>
+                                    <small class="text-muted">20 Tablets (PRN for pain)</small>
+                                </div>
+                                <span class="text-primary fw-semibold">In Stock</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-md-8">
+                            <button class="btn btn-primary btn-lg w-100 py-3 shadow-sm">
+                                <i class="bi bi-cart-check me-2"></i>Convert to POS Sale
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-light btn-lg w-100 py-3">
+                                <i class="bi bi-printer"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
