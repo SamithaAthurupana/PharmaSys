@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Medicine Management - PharmaSys</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
@@ -50,20 +51,9 @@
             width: calc(100% - var(--sidebar-width));
         }
 
-        /* Search Bar Focus */
-        .search-bar:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(30, 136, 229, 0.1);
-        }
-
         .table-card {
             border: none;
             border-radius: 15px;
-        }
-
-        .action-btn {
-            font-size: 18px;
-            transition: color 0.2s;
         }
 
         @media (max-width: 992px) {
@@ -72,6 +62,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="sidebar d-flex flex-column shadow-sm">
@@ -79,7 +70,7 @@
             <h4 class="logo-text text-primary m-0">💊 PharmaSys</h4>
         </div>
         <nav class="nav flex-column">
-            <a class="nav-link" href="#"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
+            <a class="nav-link" href="dashboard.html"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
             <a class="nav-link" href="#"><i class="bi bi-cart me-2"></i> POS (Sales)</a>
             <a class="nav-link active" href="#"><i class="bi bi-capsule me-2"></i> Medicines</a>
             <a class="nav-link" href="#"><i class="bi bi-box-seam me-2"></i> Inventory</a>
@@ -96,7 +87,7 @@
             <div class="col-md-6 d-flex justify-content-md-end gap-2 mt-3 mt-md-0">
                 <div class="input-group w-50">
                     <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                    <input type="text" class="form-control border-start-0 search-bar" placeholder="Search medicines...">
+                    <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Search medicines...">
                 </div>
                 <button class="btn btn-primary px-3 shadow-sm">
                     <i class="bi bi-plus-lg me-2"></i>Add New
@@ -114,53 +105,88 @@
                             <th class="py-3 text-muted small text-uppercase fw-bold">Batch ID</th>
                             <th class="py-3 text-muted small text-uppercase fw-bold">Expiry Date</th>
                             <th class="py-3 text-muted small text-uppercase fw-bold">Stock</th>
-                            <th class="py-3 text-muted small text-uppercase fw-bold">Status</th>
+                            <th class="py-3 text-muted small text-uppercase fw-bold">Price</th>
                             <th class="py-3 text-muted small text-uppercase fw-bold text-end pe-4">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td class="ps-4"><strong>Amoxicillin 500mg</strong></td>
-                            <td>Antibiotic</td>
-                            <td><span class="badge bg-light text-dark border">BCH-001</span></td>
-                            <td>12 Dec 2026</td>
-                            <td>150 Units</td>
-                            <td><span class="badge rounded-pill bg-success-subtle text-success px-3">Healthy</span></td>
-                            <td class="text-end pe-4">
-                                <button class="btn btn-sm btn-light text-primary me-1"><i class="bi bi-pencil-square"></i></button>
-                                <button class="btn btn-sm btn-light text-danger"><i class="bi bi-trash"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="ps-4"><strong>Cough Syrup (Benylin)</strong></td>
-                            <td>General</td>
-                            <td><span class="badge bg-light text-dark border">BCH-042</span></td>
-                            <td><span class="text-warning fw-bold">15 Jan 2026</span></td>
-                            <td>12 Units</td>
-                            <td><span class="badge rounded-pill bg-warning-subtle text-warning px-3">Expiring Soon</span></td>
-                            <td class="text-end pe-4">
-                                <button class="btn btn-sm btn-light text-primary me-1"><i class="bi bi-pencil-square"></i></button>
-                                <button class="btn btn-sm btn-light text-danger"><i class="bi bi-trash"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="ps-4"><strong>Insulin Glargine</strong></td>
-                            <td>Diabetes</td>
-                            <td><span class="badge bg-light text-dark border">BCH-099</span></td>
-                            <td>20 Aug 2027</td>
-                            <td><span class="text-danger fw-bold">02 Units</span></td>
-                            <td><span class="badge rounded-pill bg-danger-subtle text-danger px-3">Low Stock</span></td>
-                            <td class="text-end pe-4">
-                                <button class="btn btn-sm btn-light text-primary me-1"><i class="bi bi-pencil-square"></i></button>
-                                <button class="btn btn-sm btn-light text-danger"><i class="bi bi-trash"></i></button>
-                            </td>
-                        </tr>
-                    </tbody>
+                    <tbody id="medicineTableBody">
+                        </tbody>
                 </table>
+            </div>
+            <div id="loadingSpinner" class="text-center p-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">Loading medicines...</p>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const API_BASE = "http://127.0.0.1:8000";
+
+        async function loadMedicines() {
+            const tableBody = document.getElementById("medicineTableBody");
+            const spinner = document.getElementById("loadingSpinner");
+
+            try {
+                const res = await fetch(`${API_BASE}/medicines`);
+                const medicines = await res.json();
+                
+                tableBody.innerHTML = "";
+                spinner.style.display = "none";
+
+                medicines.forEach(m => {
+                    // Logic to determine stock status color
+                    let stockClass = "text-dark";
+                    let statusBadge = `<span class="badge rounded-pill bg-success-subtle text-success px-3">Healthy</span>`;
+                    
+                    if (m.stock <= 5) {
+                        stockClass = "text-danger fw-bold";
+                        statusBadge = `<span class="badge rounded-pill bg-danger-subtle text-danger px-3">Low Stock</span>`;
+                    } else if (m.stock <= 20) {
+                        stockClass = "text-warning fw-bold";
+                    }
+
+                    tableBody.innerHTML += `
+                    <tr>
+                        <td class="ps-4"><strong>${m.medicine_name}</strong></td>
+                        <td>${m.category}</td>
+                        <td><span class="badge bg-light text-dark border">${m.batch_id}</span></td>
+                        <td>${m.expiry_date}</td>
+                        <td><span class="${stockClass}">${m.stock} Units</span></td>
+                        <td>Rs. ${parseFloat(m.price).toLocaleString()}</td>
+                        <td class="text-end pe-4">
+                            <button class="btn btn-sm btn-light text-primary me-1" title="Edit"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-sm btn-light text-danger" title="Delete"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>`;
+                });
+            } catch (error) {
+                console.error("Error loading medicines:", error);
+                tableBody.innerHTML = `<tr><td colspan="7" class="text-center text-danger p-4">Failed to load data from server.</td></tr>`;
+                spinner.style.display = "none";
+            }
+        }
+
+        // Simple Search Filter
+        document.getElementById("searchInput").addEventListener("keyup", function() {
+            let filter = this.value.toUpperCase();
+            let rows = document.querySelector("#medicineTableBody").rows;
+            
+            for (let i = 0; i < rows.length; i++) {
+                let nameCol = rows[i].cells[0].textContent.toUpperCase();
+                let catCol = rows[i].cells[1].textContent.toUpperCase();
+                if (nameCol.indexOf(filter) > -1 || catCol.indexOf(filter) > -1) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }      
+            }
+        });
+
+        // Initialize
+        loadMedicines();
+    </script>
 </body>
 </html>
