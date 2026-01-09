@@ -8,6 +8,10 @@ from routers.sales_router import router as sales_router
 from routers.employee_router import router as employee_router
 from routers.dashboard_router import router as dashboard_router
 from routers.user_router import router as user_router
+from routers.medicine_router import router as medicine_router
+
+
+
 
 app = FastAPI(title="PharmaSys Backend")
 
@@ -21,6 +25,7 @@ app.add_middleware(
 )
 
 # Routers
+app.include_router(medicine_router)
 app.include_router(user_router)
 app.include_router(medicine_router)
 app.include_router(supplier_router)

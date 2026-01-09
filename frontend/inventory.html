@@ -1,208 +1,177 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory Tracking - PharmaSys</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
-    <style>
-        :root {
-            --primary-color: #1E88E5;
-            --sidebar-width: 260px;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventory - PharmaSys</title>
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #F5F7FA;
-        }
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
-        h1, h2, h3, .logo { font-family: 'Poppins', sans-serif; }
+<style>
+:root { --primary:#1E88E5; --sidebar-width:260px; }
+body { font-family:'Inter',sans-serif; background:#F5F7FA; }
+h1,.logo{ font-family:'Poppins',sans-serif; }
 
-        .sidebar {
-            width: var(--sidebar-width);
-            height: 100vh;
-            position: fixed;
-            background: white;
-            border-right: 1px solid #dee2e6;
-            z-index: 1000;
-        }
+.sidebar{
+    width:var(--sidebar-width);
+    height:100vh;
+    position:fixed;
+    background:#fff;
+    border-right:1px solid #dee2e6;
+}
+.nav-link{
+    color:#555;
+    padding:12px 20px;
+    border-radius:8px;
+    margin:4px 15px;
+}
+.nav-link:hover{ background:#f0f7ff; color:var(--primary); }
+.nav-link.active{ background:var(--primary); color:#fff!important; }
 
-        .nav-link {
-            color: #555;
-            padding: 12px 20px;
-            border-radius: 8px;
-            margin: 4px 15px;
-            transition: all 0.3s;
-        }
+.main-content{
+    margin-left:var(--sidebar-width);
+    padding:30px;
+}
 
-        .nav-link.active {
-            background-color: var(--primary-color);
-            color: white !important;
-        }
-
-        .main-content {
-            margin-left: var(--sidebar-width);
-            padding: 30px;
-            width: calc(100% - var(--sidebar-width));
-        }
-
-        .card-stat {
-            border: none;
-            border-top: 4px solid;
-            border-radius: 12px;
-            transition: transform 0.2s;
-        }
-        .card-stat:hover { transform: translateY(-5px); }
-
-        .dot {
-            height: 10px;
-            width: 10px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 8px;
-        }
-
-        @media (max-width: 992px) {
-            .sidebar { margin-left: -var(--sidebar-width); }
-            .main-content { margin-left: 0; width: 100%; }
-        }
-    </style>
+.dot{
+    width:10px;height:10px;
+    border-radius:50%;
+    display:inline-block;
+    margin-right:6px;
+}
+</style>
 </head>
 
 <body>
 
-    <div class="sidebar d-flex flex-column shadow-sm">
-        <div class="p-4">
-            <h4 class="logo text-primary m-0">💊 PharmaSys</h4>
-        </div>
-        <nav class="nav flex-column">
-            <a class="nav-link" href="dashboard.html"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
-            <a class="nav-link" href="#"><i class="bi bi-cart me-2"></i> POS (Sales)</a>
-            <a class="nav-link" href="medicines.html"><i class="bi bi-capsule me-2"></i> Medicines</a>
-            <a class="nav-link active" href="#"><i class="bi bi-box-seam me-2"></i> Inventory & Expiry</a>
-            <a class="nav-link" href="#"><i class="bi bi-people me-2"></i> Employees</a>
-            <a class="nav-link" href="#"><i class="bi bi-gear me-2"></i> Settings</a>
-        </nav>
+<!-- 🔐 LOGIN CHECK -->
+<script>
+const user = JSON.parse(localStorage.getItem("user"));
+if(!user){ window.location.href="login.html"; }
+</script>
+
+<!-- SIDEBAR -->
+<div class="sidebar d-flex flex-column shadow-sm">
+    <div class="p-4">
+        <h4 class="logo text-primary">💊 PharmaSys</h4>
     </div>
 
-    <div class="main-content">
-        <header class="mb-4">
-            <h1 class="h3 fw-bold m-0">Inventory & Expiry Surveillance</h1>
-            <p class="text-muted small">Real-time tracking of stock health and expiration dates.</p>
-        </header>
+    <nav class="nav flex-column flex-grow-1">
+        <a class="nav-link" href="dashboard.html"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+        <a class="nav-link" href="pos.html"><i class="bi bi-cart me-2"></i>POS</a>
+        <a class="nav-link" href="medicine.html"><i class="bi bi-capsule me-2"></i>Medicines</a>
+        <a class="nav-link active" href="inventory.html"><i class="bi bi-box-seam me-2"></i>Inventory</a>
+        <a class="nav-link" href="employee.html"><i class="bi bi-people me-2"></i>Employees</a>
+        <a class="nav-link" href="settings.html"><i class="bi bi-gear me-2"></i>Settings</a>
+    </nav>
 
-        <div class="row g-4 mb-4">
-            <div class="col-md-4">
-                <div class="card card-stat shadow-sm border-danger p-3 text-center">
-                    <div class="text-muted small">Expired Items</div>
-                    <div class="h3 fw-bold mb-0 text-danger" id="expiredCount">0</div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card card-stat shadow-sm border-warning p-3 text-center">
-                    <div class="text-muted small">Low Stock / Near Expiry</div>
-                    <div class="h3 fw-bold mb-0 text-warning" id="criticalCount">0</div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card card-stat shadow-sm border-success p-3 text-center">
-                    <div class="text-muted small">Healthy Stock</div>
-                    <div class="h3 fw-bold mb-0 text-success" id="healthyCount">0</div>
-                </div>
+    <div class="p-3 border-top">
+        <button onclick="logout()" class="btn btn-outline-danger w-100">
+            Logout
+        </button>
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-content">
+    <header class="mb-4">
+        <h1 class="h3 fw-bold">Inventory & Expiry Surveillance</h1>
+        <p class="text-muted small">Real-time stock and expiry monitoring</p>
+    </header>
+
+    <!-- SUMMARY -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3 text-center border-danger">
+                <div class="text-muted small">Expired Items</div>
+                <div class="h3 fw-bold text-danger" id="expiredCount">0</div>
             </div>
         </div>
-
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light">
-                        <tr>
-                            <th class="ps-4 py-3 text-muted small text-uppercase">Status</th>
-                            <th class="py-3 text-muted small text-uppercase">Medicine Name</th>
-                            <th class="py-3 text-muted small text-uppercase">Batch ID</th>
-                            <th class="py-3 text-muted small text-uppercase">Expiry Date</th>
-                            <th class="py-3 text-muted small text-uppercase">Qty</th>
-                            <th class="py-3 text-muted small text-uppercase">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="inventoryTable">
-                        </tbody>
-                </table>
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3 text-center border-warning">
+                <div class="text-muted small">Critical Stock</div>
+                <div class="h3 fw-bold text-warning" id="criticalCount">0</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3 text-center border-success">
+                <div class="text-muted small">Healthy Stock</div>
+                <div class="h3 fw-bold text-success" id="healthyCount">0</div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- TABLE -->
+    <div class="card shadow-sm">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Status</th>
+                    <th>Medicine</th>
+                    <th>Batch</th>
+                    <th>Expiry</th>
+                    <th>Qty</th>
+                </tr>
+            </thead>
+            <tbody id="inventoryTable"></tbody>
+        </table>
+    </div>
+</div>
 
-    <script>
-        const API_BASE = "http://127.0.0.1:8000";
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-        async function loadInventory() {
-            try {
-                const res = await fetch(`${API_BASE}/inventory`);
-                const items = await res.json();
+<script>
+const API_BASE="http://127.0.0.1:8000";
 
-                const table = document.getElementById("inventoryTable");
-                table.innerHTML = "";
+function logout(){
+    localStorage.removeItem("user");
+    window.location.href="login.html";
+}
 
-                let expired = 0, critical = 0, healthy = 0;
-                const today = new Date();
+async function loadInventory(){
+    const res = await fetch(`${API_BASE}/inventory`);
+    const items = await res.json();
+    const table = document.getElementById("inventoryTable");
+    table.innerHTML="";
 
-                items.forEach(i => {
-                    const expiryDate = new Date(i.expiry_date);
-                    const diffTime = expiryDate - today;
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    let expired=0, critical=0, healthy=0;
+    const today = new Date();
 
-                    let statusHTML = '';
-                    let actionButton = '<span class="text-muted small">No Action</span>';
+    items.forEach(i=>{
+        const expiry = new Date(i.expiry_date);
+        const diffDays = Math.ceil((expiry - today)/(1000*60*60*24));
 
-                    // STATUS LOGIC
-                    if (diffDays < 0) {
-                        expired++;
-                        statusHTML = `<span class="dot bg-danger"></span><span class="text-danger fw-bold small">EXPIRED</span>`;
-                        actionButton = `<button class="btn btn-sm btn-dark px-3" onclick="removeItem('${i.batch_id}')">Remove</button>`;
-                    } else if (diffDays <= 30 || i.quantity <= 10) {
-                        critical++;
-                        statusHTML = `<span class="dot bg-warning"></span><span class="text-warning fw-bold small">CRITICAL</span>`;
-                        actionButton = `<button class="btn btn-sm btn-primary px-3">Restock</button>`;
-                    } else {
-                        healthy++;
-                        statusHTML = `<span class="dot bg-success"></span><span class="text-success fw-bold small">HEALTHY</span>`;
-                    }
-
-                    table.innerHTML += `
-                    <tr>
-                        <td class="ps-4">${statusHTML}</td>
-                        <td><strong>${i.medicine_name}</strong></td>
-                        <td><code class="text-dark">${i.batch_id}</code></td>
-                        <td>${i.expiry_date}</td>
-                        <td>${i.quantity} units</td>
-                        <td>${actionButton}</td>
-                    </tr>`;
-                });
-
-                // Update Summary Counts
-                document.getElementById("expiredCount").innerText = expired;
-                document.getElementById("criticalCount").innerText = critical;
-                document.getElementById("healthyCount").innerText = healthy;
-
-            } catch (error) {
-                console.error("Error loading inventory:", error);
-            }
+        let statusHTML="";
+        if(diffDays < 0){
+            expired++;
+            statusHTML=`<span class="dot bg-danger"></span><span class="text-danger fw-bold">EXPIRED</span>`;
+        } else if(diffDays <= 30 || i.quantity <= 10){
+            critical++;
+            statusHTML=`<span class="dot bg-warning"></span><span class="text-warning fw-bold">CRITICAL</span>`;
+        } else {
+            healthy++;
+            statusHTML=`<span class="dot bg-success"></span><span class="text-success fw-bold">HEALTHY</span>`;
         }
 
-        function removeItem(batchId) {
-            if(confirm(`Remove expired batch ${batchId}?`)) {
-                // You can add your DELETE fetch call here
-                alert("Removal request sent to backend.");
-            }
-        }
+        table.innerHTML+=`
+        <tr>
+            <td>${statusHTML}</td>
+            <td>${i.medicine_name}</td>
+            <td>${i.batch_id}</td>
+            <td>${i.expiry_date}</td>
+            <td>${i.quantity}</td>
+        </tr>`;
+    });
 
-        loadInventory();
-    </script>
+    expiredCount.innerText=expired;
+    criticalCount.innerText=critical;
+    healthyCount.innerText=healthy;
+}
+
+loadInventory();
+</script>
+
 </body>
 </html>

@@ -1,41 +1,75 @@
 from database import get_db_connection
-
 def get_all_medicines():
-    connection = get_db_connection()
-    cursor = connection.cursor(dictionary=True)
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("SELECT * FROM medicines")
-    medicines = cursor.fetchall()
+    cursor.execute("""
+        SELECT medicine_id, medicine_name, category, batch_id,
+               expiry_date, stock, price
+        FROM medicines
+        ORDER BY medicine_id DESC
+    """)
+
+    data = cursor.fetchall()
+
+    # Convert date → string (important)
+    for m in data:
+        if m["expiry_date"]:
+            m["expiry_date"] = m["expiry_date"].strftime("%Y-%m-%d")
 
     cursor.close()
-    connection.close()
+    conn.close()
+    return data
 
-    return medicines
 
 
-def create_medicine(medicine):
-    connection = get_db_connection()
-    cursor = connection.cursor()
 
-    query = """
+def create_medicine(med):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
         INSERT INTO medicines
-        (medicine_name, category, batch_id, expiry_date, price, reorder_level)
+        (medicine_name, category, batch_id, expiry_date, stock, price)
         VALUES (%s, %s, %s, %s, %s, %s)
-    """
+    """, (
+        med.medicine_name,
+        med.category,
+        med.batch_id,
+        med.expiry_date,
+        med.stock,      # 🔥 CHANGED
+        med.price
+    ))
 
-    values = (
-        medicine.medicine_name,
-        medicine.category,
-        medicine.batch_id,
-        medicine.expiry_date,
-        medicine.price,
-        medicine.reorder_level
-    )
-
-    cursor.execute(query, values)
-    connection.commit()
-
+    conn.commit()
     cursor.close()
-    connection.close()
+    conn.close()
+    return True
 
+
+
+def update_medicine(medicine_id, med):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE medicines
+        SET medicine_name=%s,
+            category=%s,
+            expiry_date=%s,
+            stock=%s,
+            price=%s
+        WHERE medicine_id=%s
+    """, (
+        med.medicine_name,
+        med.category,
+        med.expiry_date,
+        med.stock,     # 🔥 CHANGED
+        med.price,
+        medicine_id
+    ))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
     return True
