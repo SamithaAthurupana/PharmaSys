@@ -1,37 +1,26 @@
-from fastapi import APIRouter
-from database import get_db_connection
+from fastapi import APIRouter, HTTPException
+from models.inventory_model import (
+    get_inventory_list,
+    update_inventory_quantity
+)
 
 router = APIRouter(prefix="/inventory", tags=["Inventory"])
 
+
+# ✅ GET inventory list
 @router.get("/")
 def get_inventory():
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    return get_inventory_list()
 
-    cursor.execute("""
-        SELECT 
-            m.medicine_id,
-            m.medicine_name,
-            m.batch_id,
-            m.expiry_date,
-            m.price,
-            i.quantity
-        FROM inventory i
-        JOIN medicines m ON i.medicine_id = m.medicine_id
-    """)
 
-    rows = cursor.fetchall()
-    cursor.close()
-    conn.close()
+# ✅ UPDATE inventory quantity (THIS WAS MISSING)
+@router.put("/{medicine_id}")
+def update_inventory(medicine_id: int, quantity: int):
+    success = update_inventory_quantity(medicine_id, quantity)
+    if not success:
+        raise HTTPException(
+            status_code=400,
+            detail="Failed to update inventory quantity"
+        )
 
-    return [
-        {
-            "medicine_id": r[0],
-            "medicine_name": r[1],
-            "batch_id": r[2],
-            "expiry_date": str(r[3]),
-            "price": float(r[4]),
-            "quantity": r[5]
-        }
-        for r in rows
-    ]
+    return {"message": "Inventory updated successfully"}

@@ -15,6 +15,7 @@ def list_medicines():
     return get_all_medicines()
 
 
+
 @router.post("/")
 def add_medicine(med: MedicineCreate):
     if not create_medicine(med):

@@ -1,5 +1,7 @@
 from database import get_db_connection
 
+from database import get_db_connection
+
 def get_all_medicines():
     conn = get_db_connection()
     if not conn:
@@ -8,19 +10,16 @@ def get_all_medicines():
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT 
+        SELECT
             m.medicine_id,
             m.medicine_name,
             m.category,
             m.batch_id,
             m.expiry_date,
             m.price,
-            m.reorder_level,
             i.quantity
-        FROM dbo.medicines m
-        INNER JOIN dbo.inventory i 
-            ON m.medicine_id = i.medicine_id
-        ORDER BY m.medicine_id DESC
+        FROM medicines m
+        JOIN inventory i ON m.medicine_id = i.medicine_id
     """)
 
     rows = cursor.fetchall()
@@ -34,8 +33,7 @@ def get_all_medicines():
             "batch_id": r[3],
             "expiry_date": str(r[4]) if r[4] else None,
             "price": float(r[5]),
-            "reorder_level": r[6],
-            "quantity": r[7]
+            "quantity": r[6]   # ✅ inventory quantity
         })
 
     cursor.close()

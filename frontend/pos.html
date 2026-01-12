@@ -223,24 +223,41 @@ function updateCart() {
 
 /* ================= PAY ================= */
 async function payNow() {
-    if (cart.length === 0) return;
+    const payload = {
+        user_id: user.user_id,
+        discount: discountPercent,
+        total_amount: total,
+        items: cart.map(item => ({
+            medicine_id: item.medicine_id,
+            quantity: item.quantity,
+            price: item.price
+        }))
+    };
 
-    const res = await fetch(`${API}/sales`, {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({ user_id:1, discount:0, items:cart })
-    });
+    try {
+        const res = await fetch("http://127.0.0.1:8000/sales", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
 
-    if (!res.ok) return alert("Sale failed");
+        if (!res.ok) {
+            const err = await res.json();
+            alert(err.detail || "Sale failed");
+            return;
+        }
 
-    const data = await res.json();
-    generatePDF(data.sale_id);
-    showThankYouPopup();
+        const data = await res.json();
+        alert("Payment successful");
+        cart = [];
+        loadInventory();
+        loadCart();
 
-    cart = [];
-    updateCart();
-    loadMedicines();
+    } catch (e) {
+        alert("Sale failed");
+    }
 }
+
 
 /* ================= PRINT ================= */
 function printInvoice() {

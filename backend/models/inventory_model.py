@@ -1,5 +1,56 @@
 from database import get_db_connection
 
+def create_sale(sale):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        # 1️⃣ Create sale
+        cursor.execute("""
+            INSERT INTO sales (user_id, discount, total_amount)
+            VALUES (?, ?, ?)
+        """, (
+            sale.user_id,
+            sale.discount,
+            sale.total_amount
+        ))
+
+        sale_id = cursor.execute("SELECT SCOPE_IDENTITY()").fetchone()[0]
+
+        # 2️⃣ Insert sale items + reduce inventory
+        for item in sale.items:
+            # Insert sale item
+            cursor.execute("""
+                INSERT INTO sale_items (sale_id, medicine_id, quantity, price)
+                VALUES (?, ?, ?, ?)
+            """, (
+                sale_id,
+                item.medicine_id,
+                item.quantity,
+                item.price
+            ))
+
+            # 🔥 IMPORTANT: Reduce inventory
+            cursor.execute("""
+                UPDATE inventory
+                SET quantity = quantity - ?
+                WHERE medicine_id = ?
+            """, (
+                item.quantity,
+                item.medicine_id
+            ))
+
+        conn.commit()
+        return sale_id
+
+    except Exception as e:
+        conn.rollback()
+        raise e
+
+    finally:
+        cursor.close()
+        conn.close()
+
 
 def get_inventory_list():
     conn = get_db_connection()
@@ -66,6 +117,7 @@ def update_inventory_quantity(medicine_id, quantity):
 
         conn.commit()
         return True
+
 
     except Exception as e:
         conn.rollback()
