@@ -16,115 +16,107 @@
         .qty-input { width:70px; }
         .cart-scroll { max-height:350px; overflow-y:auto; }
         .remove-btn { cursor:pointer; color:#dc3545; }
-
-        /* Modal manual fix */
-        .modal.show {
-            display: block;
-            background: rgba(0,0,0,0.5);
-        }
+        .modal.show { display:block; background:rgba(0,0,0,0.5); }
     </style>
 </head>
 
 <body>
 
+<!-- LOGIN CHECK -->
+<script>
+const user = JSON.parse(localStorage.getItem("user"));
+if (!user) window.location.href = "login.html";
+</script>
+
 <!-- HEADER -->
 <nav class="navbar navbar-dark bg-primary px-4 shadow-sm">
     <span class="navbar-brand logo-font fw-bold">💊 PharmaSys POS</span>
-    <span class="text-white">Pharmacist: Sarah Khan</span>
+    <span class="text-white">Pharmacist: ${user?.username || "User"}</span>
 </nav>
 
 <div class="container-fluid mt-3">
-    <div class="row">
+<div class="row">
 
-        <!-- MEDICINE LIST -->
-        <div class="col-md-8">
-            <input class="form-control mb-3" id="searchInput" placeholder="Search medicine by name">
+<!-- MEDICINES -->
+<div class="col-md-8">
+    <input class="form-control mb-3" id="searchInput" placeholder="Search medicine by name">
 
-            <div class="card shadow-sm">
-                <table class="table mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Medicine</th>
-                            <th>Batch</th>
-                            <th>Stock</th>
-                            <th>Price</th>
-                            <th>Qty</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="medicineTable"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- CART -->
-        <div class="col-md-4">
-            <div class="card shadow-sm p-3">
-                <div class="d-flex justify-content-between mb-2">
-                    <h5 class="logo-font">Current Cart</h5>
-                    <span class="badge bg-primary" id="cartCount">0</span>
-                </div>
-
-                <div id="cartBody" class="cart-scroll text-muted text-center">
-                    Cart is empty
-                </div>
-
-                <hr>
-
-                <div class="d-flex justify-content-between">
-                    <span>Subtotal</span>
-                    <strong id="subtotal">Rs. 0.00</strong>
-                </div>
-
-                <div class="d-flex justify-content-between">
-                    <span>Discount (5%)</span>
-                    <strong class="text-danger" id="discount">- Rs. 0.00</strong>
-                </div>
-
-                <hr>
-
-                <div class="d-flex justify-content-between fs-5 fw-bold text-primary">
-                    <span>Total</span>
-                    <span id="total">Rs. 0.00</span>
-                </div>
-
-                <div class="row g-2 mt-3">
-                    <div class="col-6">
-                        <button class="btn btn-outline-primary w-100"
-                                onclick="printInvoice()"
-                                id="printBtn"
-                                disabled>
-                            <i class="bi bi-printer"></i> Print
-                        </button>
-                    </div>
-                    <div class="col-6">
-                        <button class="btn btn-success w-100"
-                                onclick="payNow()"
-                                id="payBtn"
-                                disabled>
-                            <i class="bi bi-wallet2"></i> Pay Now
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+    <div class="card shadow-sm">
+        <table class="table mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Medicine</th>
+                    <th>Batch</th>
+                    <th>Stock</th>
+                    <th>Price</th>
+                    <th>Qty</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="medicineTable"></tbody>
+        </table>
     </div>
 </div>
 
-<!-- THANK YOU POPUP (MANUAL, 100% WORKING) -->
-<div id="thankYouModal" class="modal" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content text-center p-4">
-            <div class="modal-body">
-                <i class="bi bi-check-circle-fill text-success" style="font-size:3rem"></i>
-                <h4 class="mt-3 fw-bold">Thank You!</h4>
-                <p class="text-muted">Your purchase was completed successfully.</p>
-                <p class="text-muted">Get well soon 💊</p>
-                <button class="btn btn-primary mt-2" onclick="closeThankYou()">OK</button>
-            </div>
+<!-- CART -->
+<div class="col-md-4">
+<div class="card shadow-sm p-3">
+    <div class="d-flex justify-content-between mb-2">
+        <h5 class="logo-font">Current Cart</h5>
+        <span class="badge bg-primary" id="cartCount">0</span>
+    </div>
+
+    <div id="cartBody" class="cart-scroll text-muted text-center">
+        Cart is empty
+    </div>
+
+    <hr>
+
+    <div class="d-flex justify-content-between">
+        <span>Subtotal</span>
+        <strong id="subtotal">Rs. 0.00</strong>
+    </div>
+
+    <div class="d-flex justify-content-between">
+        <span>Discount (5%)</span>
+        <strong class="text-danger" id="discount">- Rs. 0.00</strong>
+    </div>
+
+    <hr>
+
+    <div class="d-flex justify-content-between fs-5 fw-bold text-primary">
+        <span>Total</span>
+        <span id="total">Rs. 0.00</span>
+    </div>
+
+    <div class="row g-2 mt-3">
+        <div class="col-6">
+            <button class="btn btn-outline-primary w-100" onclick="printInvoice()" id="printBtn" disabled>
+                <i class="bi bi-printer"></i> Print
+            </button>
+        </div>
+        <div class="col-6">
+            <button class="btn btn-success w-100" onclick="payNow()" id="payBtn" disabled>
+                <i class="bi bi-wallet2"></i> Pay Now
+            </button>
         </div>
     </div>
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- THANK YOU MODAL -->
+<div id="thankYouModal" class="modal">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content text-center p-4">
+    <i class="bi bi-check-circle-fill text-success fs-1"></i>
+    <h4 class="mt-3 fw-bold">Thank You!</h4>
+    <p>Your purchase was completed successfully.</p>
+    <button class="btn btn-primary" onclick="closeThankYou()">OK</button>
+</div>
+</div>
 </div>
 
 <script>
@@ -132,7 +124,7 @@ const API = "http://127.0.0.1:8000";
 let medicines = [];
 let cart = [];
 
-/* ================= LOAD INVENTORY ================= */
+/* LOAD INVENTORY */
 async function loadMedicines() {
     const res = await fetch(`${API}/inventory`);
     medicines = await res.json();
@@ -152,12 +144,10 @@ function renderMedicines(list) {
             <td>Rs. ${Number(m.price).toFixed(2)}</td>
             <td>
                 <input type="number" min="1" max="${m.quantity}" value="1"
-                       id="qty_${m.medicine_id}"
-                       class="form-control qty-input">
+                       id="qty_${m.medicine_id}" class="form-control qty-input">
             </td>
             <td>
-                <button class="btn btn-primary btn-sm"
-                        onclick="addToCart(${m.medicine_id})">
+                <button class="btn btn-primary btn-sm" onclick="addToCart(${m.medicine_id})">
                     Add +
                 </button>
             </td>
@@ -165,7 +155,7 @@ function renderMedicines(list) {
     });
 }
 
-/* ================= CART ================= */
+/* CART */
 function addToCart(id) {
     const med = medicines.find(m => m.medicine_id === id);
     const qty = parseInt(document.getElementById(`qty_${id}`).value);
@@ -180,7 +170,6 @@ function addToCart(id) {
     } else {
         cart.push({ medicine_id:id, name:med.medicine_name, price:med.price, quantity:qty });
     }
-
     updateCart();
 }
 
@@ -203,8 +192,7 @@ function updateCart() {
                 <div>${i.name} x ${i.quantity}</div>
                 <div>
                     Rs. ${(i.price*i.quantity).toFixed(2)}
-                    <span class="remove-btn ms-2"
-                          onclick="removeItem(${i.medicine_id})">✖</span>
+                    <span class="remove-btn" onclick="removeItem(${i.medicine_id})">✖</span>
                 </div>
             </div>`;
         });
@@ -221,45 +209,6 @@ function updateCart() {
     cartCount.innerText = cart.length;
 }
 
-/* ================= PAY ================= */
-async function payNow() {
-    const payload = {
-        user_id: user.user_id,
-        discount: discountPercent,
-        total_amount: total,
-        items: cart.map(item => ({
-            medicine_id: item.medicine_id,
-            quantity: item.quantity,
-            price: item.price
-        }))
-    };
-
-    try {
-        const res = await fetch("http://127.0.0.1:8000/sales", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) {
-            const err = await res.json();
-            alert(err.detail || "Sale failed");
-            return;
-        }
-
-        const data = await res.json();
-        alert("Payment successful");
-        cart = [];
-        loadInventory();
-        loadCart();
-
-    } catch (e) {
-        alert("Sale failed");
-    }
-}
-
-
-/* ================= PRINT ================= */
 function printInvoice() {
     if (cart.length === 0) return;
 
@@ -272,7 +221,7 @@ function printInvoice() {
 
     doc.setFontSize(10);
     doc.text(`Date: ${new Date().toLocaleString()}`, 20, 30);
-    doc.text("Cashier: Sarah Khan", 20, 36);
+    doc.text(`Cashier: ${user.username || "User"}`, 20, 36);
 
     /* ===== TABLE HEADER ===== */
     let y = 50;
@@ -327,23 +276,72 @@ function printInvoice() {
     doc.save(`pharmasys_invoice_${Date.now()}.pdf`);
 }
 
+/* PAY */
+async function payNow() {
 
-/* ================= THANK YOU POPUP (FIXED) ================= */
-function showThankYouPopup() {
-    document.getElementById("thankYouModal").classList.add("show");
+    if (cart.length === 0) return alert("Cart is empty");
+
+    const subtotal = cart.reduce((s,i)=>s+i.price*i.quantity,0);
+    const discount = subtotal * 0.05;
+    const total = subtotal - discount;
+
+    const payload = {
+        user_id: user.user_id,
+        discount: discount,
+        total_amount: total,
+        items: cart.map(item => ({
+            medicine_id: item.medicine_id,
+            quantity: item.quantity,
+            price: item.price
+        }))
+    };
+
+    try {
+        const res = await fetch("http://127.0.0.1:8000/sales", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            alert(err.detail || "Sale failed");
+            return;
+        }
+
+        showThankYouPopup();
+
+        // 🔥 CLEAR ONLY AFTER SUCCESS
+        cart = [];
+        updateCart();
+        loadMedicines();   // inventory reload
+
+    } catch (e) {
+        alert("Sale failed");
+    }
 }
 
-function closeThankYou() {
-    document.getElementById("thankYouModal").classList.remove("show");
+
+/* PRINT */
+function printInvoice() {
+    if (cart.length === 0) return;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.text("PharmaSys Pharmacy",20,20);
+    doc.save("invoice.pdf");
 }
 
-/* ================= SEARCH ================= */
-searchInput.addEventListener("input", e => {
+/* MODAL */
+function showThankYouPopup(){ document.getElementById("thankYouModal").classList.add("show"); }
+function closeThankYou(){ document.getElementById("thankYouModal").classList.remove("show"); }
+
+/* SEARCH */
+searchInput.addEventListener("input", e=>{
     const t = e.target.value.toLowerCase();
-    renderMedicines(medicines.filter(m => m.medicine_name.toLowerCase().includes(t)));
+    renderMedicines(medicines.filter(m=>m.medicine_name.toLowerCase().includes(t)));
 });
 
-/* ================= INIT ================= */
+/* INIT */
 const payBtn = document.getElementById("payBtn");
 const printBtn = document.getElementById("printBtn");
 const subtotalEl = document.getElementById("subtotal");
