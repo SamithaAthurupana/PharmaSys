@@ -1,33 +1,19 @@
 from pydantic import BaseModel
-from typing import Optional
 from datetime import date
-
-class MedicineBase(BaseModel):
-    medicine_name: str
-    category: str
-    batch_id: str
-    expiry_date: date
-    price: float
-    reorder_level: int
+from typing import Optional
 
 class MedicineCreate(BaseModel):
     medicine_name: str
-    category: str
-    batch_id: str
-    expiry_date: date
-    stock: int       # 🔥 NOT quantity
+    category: Optional[str] = None
+    batch_id: Optional[str] = None
+    expiry_date: Optional[date] = None
     price: float
+    reorder_level: int = 10
 
 class MedicineUpdate(BaseModel):
     medicine_name: Optional[str]
     category: Optional[str]
+    batch_id: Optional[str]
     expiry_date: Optional[date]
-    stock: Optional[int]
     price: Optional[float]
-
-
-class MedicineResponse(MedicineBase):
-    medicine_id: int
-
-    class Config:
-        from_attributes = True
+    reorder_level: Optional[int]
