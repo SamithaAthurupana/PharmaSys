@@ -59,13 +59,11 @@ h1,.logo{ font-family:'Poppins',sans-serif; }
 
 <body>
 
-<!-- LOGIN CHECK -->
 <script>
 const user = JSON.parse(localStorage.getItem("user"));
 if(!user){ window.location.href="login.html"; }
 </script>
 
-<!-- SIDEBAR -->
 <div class="sidebar d-flex flex-column shadow-sm">
     <div class="p-4">
         <h4 class="logo text-primary">💊 PharmaSys</h4>
@@ -81,13 +79,10 @@ if(!user){ window.location.href="login.html"; }
     </nav>
 
     <div class="p-3 border-top">
-        <button onclick="logout()" class="btn btn-outline-danger w-100">
-            Logout
-        </button>
+        <button onclick="logout()" class="btn btn-outline-danger w-100">Logout</button>
     </div>
 </div>
 
-<!-- MAIN -->
 <div class="main-content">
     <header class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 fw-bold">Employee Management</h1>
@@ -123,6 +118,12 @@ if(!user){ window.location.href="login.html"; }
 
       <div class="modal-body">
         <input type="hidden" id="empId">
+
+        <!-- ✅ ADDED: USER ID FIELD -->
+        <div class="mb-3">
+            <label class="form-label">User ID</label>
+            <input id="userId" class="form-control" placeholder="User ID from users table">
+        </div>
 
         <div class="mb-3">
             <label class="form-label">Full Name</label>
@@ -174,7 +175,7 @@ function getRoleClass(role){
 }
 
 async function loadEmployees(){
-    const res = await fetch(`${API_BASE}/employees`);
+    const res = await fetch(`${API_BASE}/employees/`);
     const data = await res.json();
     const table=document.getElementById("employeeTable");
     table.innerHTML="";
@@ -207,6 +208,7 @@ async function loadEmployees(){
 function openAddModal(){
     modalTitle.innerText="Add Employee";
     empId.value="";
+    userId.value="";
     fullName.value="";
     shiftTime.value="";
     status.value="ON_DUTY";
@@ -217,8 +219,6 @@ function openAddModal(){
 function openEditModal(id,currentStatus){
     modalTitle.innerText="Update Status";
     empId.value=id;
-    fullName.value="";
-    shiftTime.value="";
     status.value=currentStatus;
     modal=new bootstrap.Modal(employeeModal);
     modal.show();
@@ -233,15 +233,15 @@ async function saveEmployee(){
         });
         alert("Status updated");
     }else{
-        await fetch(`${API_BASE}/employees`,{
+        await fetch(`${API_BASE}/employees/`,{
             method:"POST",
             headers:{ "Content-Type":"application/json" },
             body:JSON.stringify({
-                user_id:user.user_id,
-                full_name:fullName.value,
+                user_id: parseInt(userId.value),
+                full_name: fullName.value,
                 phone:"",
-                shift_time:shiftTime.value,
-                status:status.value
+                shift_time: shiftTime.value,
+                status: status.value
             })
         });
         alert("Employee added");

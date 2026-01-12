@@ -1,177 +1,247 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Inventory - PharmaSys</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory - PharmaSys</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
-<style>
-:root { --primary:#1E88E5; --sidebar-width:260px; }
-body { font-family:'Inter',sans-serif; background:#F5F7FA; }
-h1,.logo{ font-family:'Poppins',sans-serif; }
+    <style>
+        :root {
+            --primary: #1E88E5;
+            --sidebar-width: 260px;
+        }
 
-.sidebar{
-    width:var(--sidebar-width);
-    height:100vh;
-    position:fixed;
-    background:#fff;
-    border-right:1px solid #dee2e6;
-}
-.nav-link{
-    color:#555;
-    padding:12px 20px;
-    border-radius:8px;
-    margin:4px 15px;
-}
-.nav-link:hover{ background:#f0f7ff; color:var(--primary); }
-.nav-link.active{ background:var(--primary); color:#fff!important; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #F5F7FA;
+        }
 
-.main-content{
-    margin-left:var(--sidebar-width);
-    padding:30px;
-}
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            background: #fff;
+            border-right: 1px solid #dee2e6;
+        }
 
-.dot{
-    width:10px;height:10px;
-    border-radius:50%;
-    display:inline-block;
-    margin-right:6px;
-}
-</style>
+        .nav-link {
+            color: #555;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 4px 15px;
+        }
+
+        .nav-link.active {
+            background: var(--primary);
+            color: #fff !important;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 30px;
+        }
+    </style>
 </head>
 
 <body>
 
-<!-- 🔐 LOGIN CHECK -->
-<script>
-const user = JSON.parse(localStorage.getItem("user"));
-if(!user){ window.location.href="login.html"; }
-</script>
+    <!-- LOGIN CHECK -->
+    <script>
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (!user) window.location.href = "login.html";
+    </script>
 
-<!-- SIDEBAR -->
-<div class="sidebar d-flex flex-column shadow-sm">
-    <div class="p-4">
-        <h4 class="logo text-primary">💊 PharmaSys</h4>
+    <!-- SIDEBAR -->
+    <div class="sidebar d-flex flex-column shadow-sm">
+        <div class="p-4">
+            <h4 class="text-primary fw-bold m-0">💊 PharmaSys</h4>
+        </div>
+
+        <nav class="nav flex-column flex-grow-1">
+            <a class="nav-link" href="dashboard.html">Dashboard</a>
+            <a class="nav-link" href="pos.html">POS</a>
+            <a class="nav-link" href="medicine.html">Medicines</a>
+            <a class="nav-link active" href="inventory.html">Inventory</a>
+            <a class="nav-link" href="employee.html">Employees</a>
+            <a class="nav-link" href="settings.html">Settings</a>
+        </nav>
+
+        <div class="p-3 border-top">
+            <button onclick="logout()" class="btn btn-outline-danger w-100">Logout</button>
+        </div>
     </div>
 
-    <nav class="nav flex-column flex-grow-1">
-        <a class="nav-link" href="dashboard.html"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
-        <a class="nav-link" href="pos.html"><i class="bi bi-cart me-2"></i>POS</a>
-        <a class="nav-link" href="medicine.html"><i class="bi bi-capsule me-2"></i>Medicines</a>
-        <a class="nav-link active" href="inventory.html"><i class="bi bi-box-seam me-2"></i>Inventory</a>
-        <a class="nav-link" href="employee.html"><i class="bi bi-people me-2"></i>Employees</a>
-        <a class="nav-link" href="settings.html"><i class="bi bi-gear me-2"></i>Settings</a>
-    </nav>
+    <!-- MAIN -->
+    <div class="main-content">
+        <h1 class="h3 fw-bold mb-4">Inventory Management</h1>
 
-    <div class="p-3 border-top">
-        <button onclick="logout()" class="btn btn-outline-danger w-100">
-            Logout
-        </button>
-    </div>
-</div>
-
-<!-- MAIN -->
-<div class="main-content">
-    <header class="mb-4">
-        <h1 class="h3 fw-bold">Inventory & Expiry Surveillance</h1>
-        <p class="text-muted small">Real-time stock and expiry monitoring</p>
-    </header>
-
-    <!-- SUMMARY -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-4">
-            <div class="card shadow-sm p-3 text-center border-danger">
-                <div class="text-muted small">Expired Items</div>
-                <div class="h3 fw-bold text-danger" id="expiredCount">0</div>
+        <div class="card shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Medicine</th>
+                            <th>Batch</th>
+                            <th>Expiry</th>
+                            <th>Quantity</th>
+                            <th>Status</th>
+                            <th class="text-end pe-4">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryTableBody"></tbody>
+                </table>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm p-3 text-center border-warning">
-                <div class="text-muted small">Critical Stock</div>
-                <div class="h3 fw-bold text-warning" id="criticalCount">0</div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm p-3 text-center border-success">
-                <div class="text-muted small">Healthy Stock</div>
-                <div class="h3 fw-bold text-success" id="healthyCount">0</div>
+            <div id="loadingSpinner" class="text-center p-4">
+                <div class="spinner-border text-primary"></div>
             </div>
         </div>
     </div>
 
-    <!-- TABLE -->
-    <div class="card shadow-sm">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th>Status</th>
-                    <th>Medicine</th>
-                    <th>Batch</th>
-                    <th>Expiry</th>
-                    <th>Qty</th>
-                </tr>
-            </thead>
-            <tbody id="inventoryTable"></tbody>
-        </table>
+    <!-- UPDATE MODAL -->
+    <div class="modal fade" id="qtyModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Update Quantity</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" id="invMedicineId">
+                    <label class="form-label">Quantity</label>
+                    <input type="number" id="invQuantity" class="form-control">
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary" onclick="saveInventory()">Update</button>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-const API_BASE="http://127.0.0.1:8000";
+    <script>
+        const API_BASE = "http://127.0.0.1:8000";
+        const qtyModalEl = document.getElementById("qtyModal");
+        let qtyModal;
 
-function logout(){
-    localStorage.removeItem("user");
-    window.location.href="login.html";
-}
-
-async function loadInventory(){
-    const res = await fetch(`${API_BASE}/inventory`);
-    const items = await res.json();
-    const table = document.getElementById("inventoryTable");
-    table.innerHTML="";
-
-    let expired=0, critical=0, healthy=0;
-    const today = new Date();
-
-    items.forEach(i=>{
-        const expiry = new Date(i.expiry_date);
-        const diffDays = Math.ceil((expiry - today)/(1000*60*60*24));
-
-        let statusHTML="";
-        if(diffDays < 0){
-            expired++;
-            statusHTML=`<span class="dot bg-danger"></span><span class="text-danger fw-bold">EXPIRED</span>`;
-        } else if(diffDays <= 30 || i.quantity <= 10){
-            critical++;
-            statusHTML=`<span class="dot bg-warning"></span><span class="text-warning fw-bold">CRITICAL</span>`;
-        } else {
-            healthy++;
-            statusHTML=`<span class="dot bg-success"></span><span class="text-success fw-bold">HEALTHY</span>`;
+        function logout() {
+            localStorage.removeItem("user");
+            window.location.href = "login.html";
         }
 
-        table.innerHTML+=`
-        <tr>
-            <td>${statusHTML}</td>
-            <td>${i.medicine_name}</td>
-            <td>${i.batch_id}</td>
-            <td>${i.expiry_date}</td>
-            <td>${i.quantity}</td>
-        </tr>`;
-    });
+        function getStatus(m) {
+            const today = new Date();
+            const expiry = m.expiry_date ? new Date(m.expiry_date) : null;
 
-    expiredCount.innerText=expired;
-    criticalCount.innerText=critical;
-    healthyCount.innerText=healthy;
-}
+            if (expiry && expiry < today) {
+                return '<span class="badge bg-danger">Expired</span>';
+            }
 
-loadInventory();
-</script>
+            if (expiry) {
+                const diffDays = (expiry - today) / (1000 * 60 * 60 * 24);
+                if (diffDays <= 30) {
+                    return '<span class="badge bg-warning text-dark">Expiring Soon</span>';
+                }
+            }
+
+            if (m.quantity <= m.reorder_level) {
+                return '<span class="badge bg-danger">Low Stock</span>';
+            }
+
+            return '<span class="badge bg-success">OK</span>';
+        }
+
+        function openQtyModal(m) {
+            qtyModal = new bootstrap.Modal(qtyModalEl);
+            invMedicineId.value = m.medicine_id;
+            invQuantity.value = m.quantity;
+            qtyModal.show();
+        }
+
+        async function saveInventory() {
+            const id = invMedicineId.value;
+            const qty = parseInt(invQuantity.value);
+
+            if (qty < 0) {
+                alert("Quantity cannot be negative");
+                return;
+            }
+
+            const res = await fetch(`${API_BASE}/inventory/${id}?quantity=${qty}`, {
+                method: "PUT"
+            });
+
+            if (!res.ok) {
+                const err = await res.json();
+                alert(err.detail || "Update failed");
+                return;
+            }
+
+            qtyModal.hide();
+            loadInventory();
+        }
+
+        async function loadInventory() {
+            const body = document.getElementById("inventoryTableBody");
+            const spinner = document.getElementById("loadingSpinner");
+
+            try {
+                const res = await fetch(`${API_BASE}/inventory`);
+                const data = await res.json();
+
+                spinner.style.display = "none";
+                body.innerHTML = "";
+
+                if (data.length === 0) {
+                    body.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center text-muted p-4">
+                                No inventory records found
+                            </td>
+                        </tr>`;
+                    return;
+                }
+
+                data.forEach(m => {
+                    body.innerHTML += `
+                        <tr>
+                            <td class="ps-4 fw-bold">${m.medicine_name}</td>
+                            <td>${m.batch_id || "-"}</td>
+                            <td>${m.expiry_date || "-"}</td>
+                            <td>${m.quantity}</td>
+                            <td>${getStatus(m)}</td>
+                            <td class="text-end pe-4">
+                                <button class="btn btn-sm btn-outline-primary"
+                                    onclick='openQtyModal(${JSON.stringify(m)})'>
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </td>
+                        </tr>`;
+                });
+
+            } catch (err) {
+                console.error(err);
+                spinner.style.display = "none";
+                body.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center text-danger p-4">
+                            Failed to load inventory
+                        </td>
+                    </tr>`;
+            }
+        }
+
+        loadInventory();
+    </script>
 
 </body>
 </html>

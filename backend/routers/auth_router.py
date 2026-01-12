@@ -1,15 +1,11 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from passlib.context import CryptContext
 from database import get_db_connection
+from passlib.context import CryptContext
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
-pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto"
-)
-
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 class LoginRequest(BaseModel):
     username: str
@@ -21,20 +17,19 @@ def login(data: LoginRequest):
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT user_id, username, password_hash, role
+        SELECT user_id, username, password_hash
         FROM users
         WHERE username = ?
     """, (data.username,))
 
-    user = cursor.fetchone()
-
+    row = cursor.fetchone()
     cursor.close()
     conn.close()
 
-    if not user:
+    if not row:
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
-    user_id, username, password_hash, role = user
+    user_id, username, password_hash = row
 
     if not pwd_context.verify(data.password, password_hash):
         raise HTTPException(status_code=401, detail="Invalid username or password")
@@ -42,7 +37,6 @@ def login(data: LoginRequest):
     return {
         "user": {
             "user_id": user_id,
-            "username": username,
-            "role": role
+            "username": username
         }
     }

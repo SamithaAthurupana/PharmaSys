@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pharmacy Login - PharmaSys</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
@@ -40,13 +41,13 @@
             font-weight: bold;
         }
 
-        .form-control, .form-select {
+        .form-control {
             padding: 12px 15px;
             border-radius: 10px;
             border: 1px solid #E0E0E0;
         }
 
-        .form-control:focus, .form-select:focus {
+        .form-control:focus {
             border-color: #1E88E5;
             box-shadow: 0 0 0 3px rgba(30, 136, 229, 0.1);
         }
@@ -57,7 +58,6 @@
             padding: 14px;
             border-radius: 10px;
             font-weight: 600;
-            transition: all 0.3s;
         }
 
         .btn-login:hover {
@@ -89,45 +89,35 @@
 
         <form id="loginForm">
             <div class="mb-3">
-                <label class="form-label small fw-semibold text-secondary">Username / Email</label>
+                <label class="form-label small fw-semibold text-secondary">Username</label>
                 <div class="input-group">
-                    <span class="input-group-text border-end-0 text-muted bg-white">
+                    <span class="input-group-text border-end-0 bg-white">
                         <i class="bi bi-person"></i>
                     </span>
-                    <input type="text" id="username" class="form-control border-start-0" placeholder="Enter username" required>
+                    <input type="text" id="username" class="form-control border-start-0" required>
                 </div>
             </div>
 
-            <div class="mb-3">
+            <div class="mb-4">
                 <label class="form-label small fw-semibold text-secondary">Password</label>
                 <div class="input-group">
-                    <span class="input-group-text border-end-0 text-muted bg-white">
+                    <span class="input-group-text border-end-0 bg-white">
                         <i class="bi bi-lock"></i>
                     </span>
-                    <input type="password" id="password" class="form-control border-start-0 password-field" placeholder="••••••••" required>
+                    <input type="password" id="password" class="form-control border-start-0 password-field" required>
                     <span class="input-group-text bg-white" id="togglePassword">
                         <i class="bi bi-eye" id="eyeIcon"></i>
                     </span>
                 </div>
             </div>
 
-            <div class="mb-4">
-                <label class="form-label small fw-semibold text-secondary">System Role</label>
-                <select class="form-select" id="role">
-                    <option value="admin">Admin / Owner</option>
-                    <option value="pharmacist">Pharmacist</option>
-                    <option value="sales">Sales Staff</option>
-                    <option value="inventory">Inventory Manager</option>
-                </select>
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-login w-100 mb-3 text-white">
+            <button type="submit" class="btn btn-login w-100 text-white">
                 Sign In <i class="bi bi-arrow-right ms-2"></i>
             </button>
         </form>
 
-        <div class="text-center">
-            <a href="#" class="text-decoration-none small text-primary fw-medium">Forgot Password?</a>
+        <div class="text-center mt-3">
+            <a href="#" class="small text-primary">Forgot Password?</a>
         </div>
     </div>
 
@@ -136,49 +126,58 @@
     <script>
         const API_BASE = "http://127.0.0.1:8000";
 
-        // Handle Form Submission
-        document.getElementById("loginForm").addEventListener("submit", async function (e) {
+        document.getElementById("loginForm").addEventListener("submit", async (e) => {
             e.preventDefault();
 
-            const username = document.getElementById("username").value;
-            const password = document.getElementById("password").value;
-            const role = document.getElementById("role").value; // Capture the role if your backend needs it
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
 
             try {
-                const response = await fetch(`${API_BASE}/auth/login`, {
+                const res = await fetch(`${API_BASE}/auth/login`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username, password, role })
+                    body: JSON.stringify({ username, password })
                 });
 
-                const data = await response.json();
+                const data = await res.json();
 
-                if (response.ok) {
-                    // Success logic
-                    localStorage.setItem("user", JSON.stringify(data.user));
-                    alert("Login successful!");
-                    window.location.href = "dashboard.html";
-                } else {
-                    // Show error from backend (e.g., "Invalid credentials")
-                    alert(data.detail || "Login failed. Please try again.");
+                if (!res.ok) {
+                    alert(data.detail || "Invalid credentials");
+                    return;
                 }
-            } catch (error) {
-                console.error("Error:", error);
+
+                localStorage.setItem("user", JSON.stringify(data.user));
+
+                // 🔁 Role-based redirect
+                switch (data.user.role) {
+                    case "ADMIN":
+                        window.location.href = "dashboard.html";
+                        break;
+                    case "PHARMACIST":
+                    case "SALES":
+                        window.location.href = "pos.html";
+                        break;
+                    case "INVENTORY":
+                        window.location.href = "inventory.html";
+                        break;
+                    default:
+                        alert("Unknown role");
+                }
+
+            } catch {
                 alert("Could not connect to the server.");
             }
         });
 
-        // Toggle Password Visibility Logic
-        const togglePassword = document.querySelector("#togglePassword");
-        const passwordInput = document.querySelector("#password");
-        const eyeIcon = document.querySelector("#eyeIcon");
-
-        togglePassword.addEventListener("click", function () {
-            const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
-            passwordInput.setAttribute("type", type);
-            eyeIcon.classList.toggle("bi-eye");
-            eyeIcon.classList.toggle("bi-eye-slash");
+        // Password toggle
+        document.getElementById("togglePassword").addEventListener("click", () => {
+            const pass = document.getElementById("password");
+            const eye = document.getElementById("eyeIcon");
+            pass.type = pass.type === "password" ? "text" : "password";
+            eye.classList.toggle("bi-eye");
+            eye.classList.toggle("bi-eye-slash");
         });
     </script>
+
 </body>
 </html>

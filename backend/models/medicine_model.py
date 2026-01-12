@@ -1,6 +1,5 @@
 from database import get_db_connection
 
-
 def get_all_medicines():
     conn = get_db_connection()
     if not conn:
@@ -121,6 +120,34 @@ def update_medicine(medicine_id, med):
     except Exception as e:
         conn.rollback()
         print("❌ update_medicine error:", e)
+        return False
+
+    finally:
+        cursor.close()
+        conn.close()
+
+def delete_medicine(medicine_id):
+    conn = get_db_connection()
+    if not conn:
+        return False
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "DELETE FROM dbo.medicines WHERE medicine_id = ?",
+            (medicine_id,)
+        )
+
+        if cursor.rowcount == 0:
+            conn.rollback()
+            return False
+
+        conn.commit()
+        return True
+
+    except Exception as e:
+        conn.rollback()
+        print("❌ delete_medicine error:", e)
         return False
 
     finally:

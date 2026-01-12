@@ -1,49 +1,58 @@
 from database import get_db_connection
 
-def create_sale(sale):
-    connection = get_db_connection()
-    cursor = connection.cursor()
+def create_sale(user_id, discount, items):
+    conn = get_db_connection()
+    if not conn:
+        return None
+
+    cursor = conn.cursor()
 
     try:
-        # 1️⃣ Calculate total
-        total_amount = sum(item.quantity * item.price for item in sale.items)
-        total_amount -= sale.discount
+        total = sum(item["price"] * item["quantity"] for item in items)
+        total_after_discount = total - discount
 
-        # 2️⃣ Insert into sales table
-        sale_query = """
-            INSERT INTO sales (user_id, total_amount, discount)
-            VALUES (%s, %s, %s)
-        """
-        cursor.execute(sale_query, (sale.user_id, total_amount, sale.discount))
-        sale_id = cursor.lastrowid
+        # Insert sale
+        cursor.execute("""
+            INSERT INTO dbo.sales (user_id, total_amount, discount)
+            OUTPUT INSERTED.sale_id
+            VALUES (?, ?, ?)
+        """, (user_id, total_after_discount, discount))
 
-        # 3️⃣ Insert sale items + update inventory
-        for item in sale.items:
-            cursor.execute(
-                """
-                INSERT INTO sale_items (sale_id, medicine_id, quantity, price)
-                VALUES (%s, %s, %s, %s)
-                """,
-                (sale_id, item.medicine_id, item.quantity, item.price)
-            )
+        sale_id = cursor.fetchone()[0]
 
-            # Reduce stock
-            cursor.execute(
-                """
-                UPDATE inventory
-                SET quantity = quantity - %s
-                WHERE medicine_id = %s
-                """,
-                (item.quantity, item.medicine_id)
-            )
+        # Insert sale items + reduce stock
+        for item in items:
+            cursor.execute("""
+                INSERT INTO dbo.sale_items (sale_id, medicine_id, quantity, price)
+                VALUES (?, ?, ?, ?)
+            """, (
+                sale_id,
+                item["medicine_id"],
+                item["quantity"],
+                item["price"]
+            ))
 
-        connection.commit()
-        return sale_id, total_amount
+            cursor.execute("""
+                UPDATE dbo.inventory
+                SET quantity = quantity - ?
+                WHERE medicine_id = ? AND quantity >= ?
+            """, (
+                item["quantity"],
+                item["medicine_id"],
+                item["quantity"]
+            ))
+
+            if cursor.rowcount == 0:
+                raise Exception("Insufficient stock")
+
+        conn.commit()
+        return sale_id
 
     except Exception as e:
-        connection.rollback()
-        raise e
+        conn.rollback()
+        print("❌ create_sale error:", e)
+        return None
 
     finally:
         cursor.close()
-        connection.close()
+        conn.close()

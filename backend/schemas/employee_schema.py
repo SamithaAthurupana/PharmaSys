@@ -1,18 +1,8 @@
 from pydantic import BaseModel
-from typing import Optional
 
-class EmployeeBase(BaseModel):
+class EmployeeCreate(BaseModel):
     user_id: int
     full_name: str
-    phone: Optional[str] = None
-    shift_time: Optional[str] = None
+    phone: str | None = None
+    shift_time: str
     status: str = "ON_DUTY"
-
-class EmployeeCreate(EmployeeBase):
-    pass
-
-class EmployeeResponse(EmployeeBase):
-    employee_id: int
-
-    class Config:
-        from_attributes = True

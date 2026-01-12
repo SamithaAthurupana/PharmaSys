@@ -1,10 +1,10 @@
 from database import get_db_connection
 
 def get_all_employees():
-    connection = get_db_connection()
-    cursor = connection.cursor(dictionary=True)
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
-    query = """
+    cursor.execute("""
         SELECT 
             e.employee_id,
             e.full_name,
@@ -15,57 +15,41 @@ def get_all_employees():
             u.role
         FROM employees e
         JOIN users u ON e.user_id = u.user_id
-    """
+    """)
 
-    cursor.execute(query)
-    employees = cursor.fetchall()
-
+    rows = cursor.fetchall()
     cursor.close()
-    connection.close()
+    conn.close()
 
-    return employees
+    return [
+        {
+            "employee_id": r[0],
+            "full_name": r[1],
+            "phone": r[2],
+            "shift_time": r[3],
+            "status": r[4],
+            "username": r[5],
+            "role": r[6]
+        }
+        for r in rows
+    ]
 
 
 def create_employee(employee):
-    connection = get_db_connection()
-    cursor = connection.cursor()
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
-    query = """
+    cursor.execute("""
         INSERT INTO employees (user_id, full_name, phone, shift_time, status)
-        VALUES (%s, %s, %s, %s, %s)
-    """
-
-    values = (
+        VALUES (?, ?, ?, ?, ?)
+    """, (
         employee.user_id,
         employee.full_name,
         employee.phone,
         employee.shift_time,
         employee.status
-    )
+    ))
 
-    cursor.execute(query, values)
-    connection.commit()
-
+    conn.commit()
     cursor.close()
-    connection.close()
-
-    return True
-
-
-def update_employee_status(employee_id, status):
-    connection = get_db_connection()
-    cursor = connection.cursor()
-
-    query = """
-        UPDATE employees
-        SET status = %s
-        WHERE employee_id = %s
-    """
-
-    cursor.execute(query, (status, employee_id))
-    connection.commit()
-
-    cursor.close()
-    connection.close()
-
-    return True
+    conn.close()

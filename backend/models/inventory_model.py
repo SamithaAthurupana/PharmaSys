@@ -1,68 +1,77 @@
 from database import get_db_connection
 
-def get_inventory_with_medicines():
-    connection = get_db_connection()
-    cursor = connection.cursor(dictionary=True)
 
-    query = """
-        SELECT 
-            i.inventory_id,
-            m.medicine_name,
-            m.batch_id,
-            m.expiry_date,
-            m.reorder_level,
-            i.quantity,
-            i.last_updated
-        FROM inventory i
-        JOIN medicines m ON i.medicine_id = m.medicine_id
-    """
+def get_inventory_list():
+    conn = get_db_connection()
+    if not conn:
+        return []
 
-    cursor.execute(query)
-    inventory = cursor.fetchall()
+    cursor = conn.cursor()
 
+    cursor.execute("""
+    SELECT 
+        m.medicine_id,
+        m.medicine_name,
+        m.batch_id,
+        m.expiry_date,
+        m.reorder_level,
+        m.price,
+        i.quantity
+    FROM dbo.medicines m
+    JOIN dbo.inventory i ON m.medicine_id = i.medicine_id
+    ORDER BY m.medicine_name
+""")
+
+
+    rows = cursor.fetchall()
     cursor.close()
-    connection.close()
+    conn.close()
+
+    inventory = []
+    for r in rows:
+        inventory.append({
+    "medicine_id": r[0],
+    "medicine_name": r[1],
+    "batch_id": r[2],
+    "expiry_date": str(r[3]) if r[3] else None,
+    "reorder_level": r[4],
+    "price": float(r[5]),   # ✅ ADD THIS
+    "quantity": r[6]
+})
+
 
     return inventory
 
 
-def create_inventory_item(inventory):
-    connection = get_db_connection()
-    cursor = connection.cursor()
+def update_inventory_quantity(medicine_id, quantity):
+    if quantity < 0:
+        return False
 
-    query = """
-        INSERT INTO inventory (medicine_id, quantity)
-        VALUES (%s, %s)
-    """
+    conn = get_db_connection()
+    if not conn:
+        return False
 
-    values = (
-        inventory.medicine_id,
-        inventory.quantity
-    )
+    cursor = conn.cursor()
 
-    cursor.execute(query, values)
-    connection.commit()
+    try:
+        cursor.execute("""
+            UPDATE dbo.inventory
+            SET quantity = ?
+            WHERE medicine_id = ?
+        """, (quantity, medicine_id))
 
-    cursor.close()
-    connection.close()
+        if cursor.rowcount == 0:
+            conn.rollback()
+            return False
 
-    return True
+        conn.commit()
+        return True
 
+    except Exception as e:
+        conn.rollback()
+        print("❌ update_inventory_quantity error:", e)
+        return False
 
-def update_inventory_quantity(inventory_id, quantity):
-    connection = get_db_connection()
-    cursor = connection.cursor()
-
-    query = """
-        UPDATE inventory
-        SET quantity = %s
-        WHERE inventory_id = %s
-    """
-
-    cursor.execute(query, (quantity, inventory_id))
-    connection.commit()
-
-    cursor.close()
-    connection.close()
-
-    return True
+    finally:
+        cursor.close()
+        conn.close()

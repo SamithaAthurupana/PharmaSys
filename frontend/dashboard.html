@@ -21,7 +21,9 @@
             margin: 0;
         }
 
-        h1, h2, h3, .logo { font-family: 'Poppins', sans-serif; }
+        h1, h2, h3, .logo {
+            font-family: 'Poppins', sans-serif;
+        }
 
         /* Sidebar */
         .sidebar {
@@ -85,7 +87,6 @@
         <h4 class="logo text-primary">💊 PharmaSys</h4>
     </div>
 
-    <!-- ✅ FIXED NAVIGATION -->
     <nav class="nav flex-column flex-grow-1">
         <a class="nav-link active" href="dashboard.html">
             <i class="bi bi-speedometer2 me-2"></i>Dashboard
@@ -171,23 +172,33 @@
 
     async function loadDashboard() {
         const statusEl = document.getElementById("statusUpdate");
+
         try {
-            const res = await fetch(`${API_BASE}/dashboard/stats`);
+            const res = await fetch(`${API_BASE}/dashboard`);
+            if (!res.ok) throw new Error("API error");
+
             const data = await res.json();
 
-            document.getElementById("todaySales").innerText = "Rs. " + (data.today_sales || 0);
-            document.getElementById("totalMeds").innerText = data.total_medicines || 0;
-            document.getElementById("expiringSoon").innerText = data.expiring_soon || 0;
-            document.getElementById("lowStock").innerText = data.low_stock || 0;
+            document.getElementById("todaySales").innerText =
+                "Rs. " + (data.today_sales ?? 0);
 
-            statusEl.innerHTML =
-                `<span class="text-success">
+            document.getElementById("totalMeds").innerText =
+                data.total_medicines ?? 0;
+
+            document.getElementById("expiringSoon").innerText =
+                data.expiring_soon ?? 0;
+
+            document.getElementById("lowStock").innerText =
+                data.low_stock ?? 0;
+
+            statusEl.innerHTML = `
+                <span class="text-success">
                     <i class="bi bi-check-circle-fill me-1"></i>
                     All systems operational.
                 </span>`;
         } catch {
-            statusEl.innerHTML =
-                `<span class="text-danger">
+            statusEl.innerHTML = `
+                <span class="text-danger">
                     <i class="bi bi-exclamation-triangle-fill me-1"></i>
                     Backend connection failed.
                 </span>`;
@@ -196,7 +207,7 @@
 
     function logout() {
         localStorage.removeItem("user");
-        window.location.href = "index.html";
+        window.location.href = "login.html";
     }
 
     window.onload = loadDashboard;

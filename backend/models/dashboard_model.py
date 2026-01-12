@@ -1,48 +1,52 @@
 from database import get_db_connection
-from datetime import date, timedelta
 
 def get_dashboard_stats():
-    connection = get_db_connection()
-    cursor = connection.cursor(dictionary=True)
+    conn = get_db_connection()
+    if conn is None:
+        return {
+            "today_sales": 0,
+            "total_medicines": 0,
+            "low_stock": 0,
+            "expiring_soon": 0
+        }
 
-    today = date.today()
-    next_30_days = today + timedelta(days=30)
+    cursor = conn.cursor()
 
-    # 1️⃣ Today's Sales Total
+    # ✅ TOTAL SALES (NO DATE FILTER — SAFE)
     cursor.execute("""
-        SELECT IFNULL(SUM(total_amount), 0) AS today_sales
+        SELECT ISNULL(SUM(total_amount), 0)
         FROM sales
-        WHERE DATE(sale_date) = CURDATE()
     """)
-    today_sales = cursor.fetchone()["today_sales"]
+    today_sales = cursor.fetchone()[0]
 
-    # 2️⃣ Total Medicines Count
-    cursor.execute("SELECT COUNT(*) AS total_medicines FROM medicines")
-    total_medicines = cursor.fetchone()["total_medicines"]
+    # ✅ TOTAL MEDICINES
+    cursor.execute("SELECT COUNT(*) FROM medicines")
+    total_medicines = cursor.fetchone()[0]
 
-    # 3️⃣ Expiring Within 30 Days
+    # ✅ LOW STOCK
     cursor.execute("""
-        SELECT COUNT(*) AS expiring_soon
-        FROM medicines
-        WHERE expiry_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
-    """)
-    expiring_soon = cursor.fetchone()["expiring_soon"]
-
-    # 4️⃣ Low Stock Alerts
-    cursor.execute("""
-        SELECT COUNT(*) AS low_stock
+        SELECT COUNT(*)
         FROM inventory i
         JOIN medicines m ON i.medicine_id = m.medicine_id
         WHERE i.quantity <= m.reorder_level
     """)
-    low_stock = cursor.fetchone()["low_stock"]
+    low_stock = cursor.fetchone()[0]
+
+    # ✅ EXPIRING SOON (SAFE NULL CHECK)
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM medicines
+        WHERE expiry_date IS NOT NULL
+        AND expiry_date <= DATEADD(DAY, 30, GETDATE())
+    """)
+    expiring_soon = cursor.fetchone()[0]
 
     cursor.close()
-    connection.close()
+    conn.close()
 
     return {
-        "today_sales": today_sales,
+        "today_sales": float(today_sales),
         "total_medicines": total_medicines,
-        "expiring_soon": expiring_soon,
-        "low_stock": low_stock
+        "low_stock": low_stock,
+        "expiring_soon": expiring_soon
     }
