@@ -1,23 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POS - PharmaSys</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POS - PharmaSys</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    <style>
-        body { font-family: 'Inter', sans-serif; background:#F8F9FB; }
-        .logo-font { font-family:'Poppins',sans-serif; }
-        .qty-input { width:70px; }
-        .cart-scroll { max-height:350px; overflow-y:auto; }
-        .remove-btn { cursor:pointer; color:#dc3545; }
-        .modal.show { display:block; background:rgba(0,0,0,0.5); }
-    </style>
+<style>
+:root{
+    --primary:#1E88E5;
+    --sidebar-width:260px;
+}
+
+body{
+    font-family:'Inter',sans-serif;
+    background:#F8F9FB;
+}
+
+.logo-text{ font-family:'Poppins',sans-serif; }
+
+.sidebar{
+    width:var(--sidebar-width);
+    height:100vh;
+    position:fixed;
+    background:#fff;
+    border-right:1px solid #dee2e6;
+}
+
+.nav-link{
+    color:#555;
+    padding:12px 20px;
+    border-radius:8px;
+    margin:4px 15px;
+}
+
+.nav-link.active{
+    background:var(--primary);
+    color:#fff !important;
+}
+
+.main-content{
+    margin-left:var(--sidebar-width);
+    padding:20px;
+}
+
+.qty-input{ width:70px; }
+.cart-scroll{ max-height:350px; overflow-y:auto; }
+.remove-btn{ cursor:pointer; color:#dc3545; }
+.modal.show{ display:block; background:rgba(0,0,0,0.5); }
+</style>
 </head>
 
 <body>
@@ -25,16 +60,38 @@
 <!-- LOGIN CHECK -->
 <script>
 const user = JSON.parse(localStorage.getItem("user"));
-if (!user) window.location.href = "login.html";
+if(!user) window.location.href="login.html";
 </script>
 
+<!-- SIDEBAR -->
+<div class="sidebar d-flex flex-column shadow-sm">
+    <div class="p-4">
+        <h4 class="logo-text text-primary m-0">💊 PharmaSys</h4>
+    </div>
+
+    <nav class="nav flex-column flex-grow-1">
+        <a class="nav-link" href="dashboard.html">Dashboard</a>
+        <a class="nav-link active" href="pos.html">POS</a>
+        <a class="nav-link" href="medicine.html">Medicines</a>
+        <a class="nav-link" href="inventory.html">Inventory</a>
+        <a class="nav-link" href="employee.html">Employees</a>
+        <a class="nav-link" href="settings.html">Settings</a>
+    </nav>
+
+    <div class="p-3 border-top">
+        <button onclick="logout()" class="btn btn-outline-danger w-100">Logout</button>
+    </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
 <!-- HEADER -->
-<nav class="navbar navbar-dark bg-primary px-4 shadow-sm">
-    <span class="navbar-brand logo-font fw-bold">💊 PharmaSys POS</span>
-    <span class="text-white">Pharmacist: ${user?.username || "User"}</span>
+<nav class="navbar navbar-light bg-white shadow-sm rounded px-4 mb-3">
+    <span class="navbar-brand logo-text fw-bold">POS</span>
+    <span class="text-muted">User: <strong>${user.username}</strong></span>
 </nav>
 
-<div class="container-fluid mt-3">
 <div class="row">
 
 <!-- MEDICINES -->
@@ -62,7 +119,7 @@ if (!user) window.location.href = "login.html";
 <div class="col-md-4">
 <div class="card shadow-sm p-3">
     <div class="d-flex justify-content-between mb-2">
-        <h5 class="logo-font">Current Cart</h5>
+        <h5 class="logo-text">Current Cart</h5>
         <span class="badge bg-primary" id="cartCount">0</span>
     </div>
 
@@ -120,236 +177,10 @@ if (!user) window.location.href = "login.html";
 </div>
 
 <script>
-const API = "http://127.0.0.1:8000";
-let medicines = [];
-let cart = [];
-
-/* LOAD INVENTORY */
-async function loadMedicines() {
-    const res = await fetch(`${API}/inventory`);
-    medicines = await res.json();
-    renderMedicines(medicines);
+function logout(){
+    localStorage.removeItem("user");
+    window.location.href="login.html";
 }
-
-function renderMedicines(list) {
-    const body = document.getElementById("medicineTable");
-    body.innerHTML = "";
-
-    list.forEach(m => {
-        body.innerHTML += `
-        <tr>
-            <td>${m.medicine_name}</td>
-            <td>${m.batch_id || "-"}</td>
-            <td><span class="badge bg-success">${m.quantity}</span></td>
-            <td>Rs. ${Number(m.price).toFixed(2)}</td>
-            <td>
-                <input type="number" min="1" max="${m.quantity}" value="1"
-                       id="qty_${m.medicine_id}" class="form-control qty-input">
-            </td>
-            <td>
-                <button class="btn btn-primary btn-sm" onclick="addToCart(${m.medicine_id})">
-                    Add +
-                </button>
-            </td>
-        </tr>`;
-    });
-}
-
-/* CART */
-function addToCart(id) {
-    const med = medicines.find(m => m.medicine_id === id);
-    const qty = parseInt(document.getElementById(`qty_${id}`).value);
-
-    if (!qty || qty <= 0) return alert("Invalid quantity");
-    if (qty > med.quantity) return alert("Not enough stock");
-
-    const item = cart.find(i => i.medicine_id === id);
-    if (item) {
-        if (item.quantity + qty > med.quantity) return alert("Stock exceeded");
-        item.quantity += qty;
-    } else {
-        cart.push({ medicine_id:id, name:med.medicine_name, price:med.price, quantity:qty });
-    }
-    updateCart();
-}
-
-function removeItem(id) {
-    cart = cart.filter(i => i.medicine_id !== id);
-    updateCart();
-}
-
-function updateCart() {
-    const body = document.getElementById("cartBody");
-    body.innerHTML = "";
-
-    if (cart.length === 0) {
-        body.innerText = "Cart is empty";
-        payBtn.disabled = printBtn.disabled = true;
-    } else {
-        cart.forEach(i => {
-            body.innerHTML += `
-            <div class="d-flex justify-content-between mb-2">
-                <div>${i.name} x ${i.quantity}</div>
-                <div>
-                    Rs. ${(i.price*i.quantity).toFixed(2)}
-                    <span class="remove-btn" onclick="removeItem(${i.medicine_id})">✖</span>
-                </div>
-            </div>`;
-        });
-        payBtn.disabled = printBtn.disabled = false;
-    }
-
-    const subtotal = cart.reduce((s,i)=>s+i.price*i.quantity,0);
-    const discount = subtotal * 0.05;
-    const total = subtotal - discount;
-
-    subtotalEl.innerText = `Rs. ${subtotal.toFixed(2)}`;
-    discountEl.innerText = `- Rs. ${discount.toFixed(2)}`;
-    totalEl.innerText = `Rs. ${total.toFixed(2)}`;
-    cartCount.innerText = cart.length;
-}
-
-function printInvoice() {
-    if (cart.length === 0) return;
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-
-    /* ===== HEADER ===== */
-    doc.setFontSize(16);
-    doc.text("PharmaSys Pharmacy", 20, 20);
-
-    doc.setFontSize(10);
-    doc.text(`Date: ${new Date().toLocaleString()}`, 20, 30);
-    doc.text(`Cashier: ${user.username || "User"}`, 20, 36);
-
-    /* ===== TABLE HEADER ===== */
-    let y = 50;
-    doc.setFontSize(11);
-    doc.text("Medicine", 20, y);
-    doc.text("Qty", 110, y);
-    doc.text("Price", 130, y);
-    doc.text("Total", 160, y);
-
-    y += 4;
-    doc.line(20, y, 190, y);
-    y += 8;
-
-    /* ===== ITEMS ===== */
-    let subtotal = 0;
-
-    cart.forEach(item => {
-        const lineTotal = item.price * item.quantity;
-        subtotal += lineTotal;
-
-        doc.text(item.name, 20, y);
-        doc.text(String(item.quantity), 112, y);
-        doc.text(`Rs. ${item.price.toFixed(2)}`, 130, y);
-        doc.text(`Rs. ${lineTotal.toFixed(2)}`, 160, y);
-
-        y += 8;
-    });
-
-    /* ===== TOTALS ===== */
-    const discount = subtotal * 0.05;
-    const total = subtotal - discount;
-
-    y += 5;
-    doc.line(20, y, 190, y);
-    y += 10;
-
-    doc.setFontSize(11);
-    doc.text(`Subtotal: Rs. ${subtotal.toFixed(2)}`, 130, y);
-    y += 7;
-    doc.text(`Discount (5%): Rs. ${discount.toFixed(2)}`, 130, y);
-    y += 7;
-
-    doc.setFontSize(13);
-    doc.text(`TOTAL: Rs. ${total.toFixed(2)}`, 130, y);
-
-    /* ===== FOOTER ===== */
-    y += 15;
-    doc.setFontSize(10);
-    doc.text("Thank you for your purchase!", 20, y);
-    doc.text("Get well soon 💊", 20, y + 6);
-
-    doc.save(`pharmasys_invoice_${Date.now()}.pdf`);
-}
-
-/* PAY */
-async function payNow() {
-
-    if (cart.length === 0) return alert("Cart is empty");
-
-    const subtotal = cart.reduce((s,i)=>s+i.price*i.quantity,0);
-    const discount = subtotal * 0.05;
-    const total = subtotal - discount;
-
-    const payload = {
-        user_id: user.user_id,
-        discount: discount,
-        total_amount: total,
-        items: cart.map(item => ({
-            medicine_id: item.medicine_id,
-            quantity: item.quantity,
-            price: item.price
-        }))
-    };
-
-    try {
-        const res = await fetch("http://127.0.0.1:8000/sales", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) {
-            const err = await res.json();
-            alert(err.detail || "Sale failed");
-            return;
-        }
-
-        showThankYouPopup();
-
-        // 🔥 CLEAR ONLY AFTER SUCCESS
-        cart = [];
-        updateCart();
-        loadMedicines();   // inventory reload
-
-    } catch (e) {
-        alert("Sale failed");
-    }
-}
-
-
-/* PRINT */
-function printInvoice() {
-    if (cart.length === 0) return;
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    doc.text("PharmaSys Pharmacy",20,20);
-    doc.save("invoice.pdf");
-}
-
-/* MODAL */
-function showThankYouPopup(){ document.getElementById("thankYouModal").classList.add("show"); }
-function closeThankYou(){ document.getElementById("thankYouModal").classList.remove("show"); }
-
-/* SEARCH */
-searchInput.addEventListener("input", e=>{
-    const t = e.target.value.toLowerCase();
-    renderMedicines(medicines.filter(m=>m.medicine_name.toLowerCase().includes(t)));
-});
-
-/* INIT */
-const payBtn = document.getElementById("payBtn");
-const printBtn = document.getElementById("printBtn");
-const subtotalEl = document.getElementById("subtotal");
-const discountEl = document.getElementById("discount");
-const totalEl = document.getElementById("total");
-const cartCount = document.getElementById("cartCount");
-
-loadMedicines();
 </script>
 
 </body>
