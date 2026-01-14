@@ -91,25 +91,33 @@ def delete_employee(employee_id: int):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute(
-        "SELECT user_id FROM employees WHERE employee_id = ?",
-        (employee_id,)
-    )
+    # 🔒 CHECK ROLE FIRST
+    cursor.execute("""
+        SELECT r.role_name
+        FROM employees e
+        JOIN users u ON e.user_id = u.user_id
+        JOIN roles r ON u.role_id = r.role_id
+        WHERE e.employee_id = ?
+    """, (employee_id,))
+
     row = cursor.fetchone()
+
     if not row:
-        cursor.close()
         conn.close()
         return False
 
-    # Delete employee only (keep user)
-    cursor.execute(
-        "DELETE FROM employees WHERE employee_id = ?",
-        (employee_id,)
-    )
+    role_name = row[0]
 
+    # 🔒 BLOCK ADMIN DELETION
+    if role_name == "ADMIN":
+        conn.close()
+        raise Exception("ADMIN user cannot be deleted")
+
+    # ✅ DELETE NON-ADMIN
+    cursor.execute("DELETE FROM employees WHERE employee_id = ?", (employee_id,))
     conn.commit()
-    cursor.close()
     conn.close()
+
     return True
 
 def get_available_users_by_role(role_name: str):
