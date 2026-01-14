@@ -18,4 +18,4 @@ conn.commit()
 cursor.close()
 conn.close()
 
-print("✅ Admin password reset to: admin123")
+print("Admin password reset to: admin123")
