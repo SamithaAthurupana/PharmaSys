@@ -1,15 +1,9 @@
 from passlib.context import CryptContext
-import pyodbc
+from database import get_db_connection
 
 pwd = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-conn = pyodbc.connect(
-    "DRIVER={ODBC Driver 17 for SQL Server};"
-    "SERVER=localhost\\SQLEXPRESS;"
-    "DATABASE=pharmacy_db;"
-    "Trusted_Connection=yes;"
-)
-
+conn = get_db_connection()
 cursor = conn.cursor()
 
 hashed = pwd.hash("admin123")
@@ -24,4 +18,4 @@ conn.commit()
 cursor.close()
 conn.close()
 
-print("✅ Admin password reset successfully")
+print("✅ Admin password reset to: admin123")

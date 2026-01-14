@@ -1,42 +1,63 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+import pyodbc
 from database import get_db_connection
-from passlib.context import CryptContext
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
-pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
+# -------------------------
+# Request model
+# -------------------------
 class LoginRequest(BaseModel):
     username: str
     password: str
 
+
+# -------------------------
+# LOGIN API
+# -------------------------
 @router.post("/login")
 def login(data: LoginRequest):
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
-    cursor.execute("""
-        SELECT user_id, username, password_hash
-        FROM users
-        WHERE username = ?
-    """, (data.username,))
+        query = """
+        SELECT 
+            u.user_id,
+            u.username,
+            r.role_name
+        FROM users u
+        JOIN roles r ON u.role_id = r.role_id
+        WHERE u.username = ? 
+          AND u.password_hash = ?
+          AND u.is_active = 1
+        """
 
-    row = cursor.fetchone()
-    cursor.close()
-    conn.close()
+        cursor.execute(query, (data.username, data.password))
+        row = cursor.fetchone()
 
-    if not row:
-        raise HTTPException(status_code=401, detail="Invalid username or password")
+        cursor.close()
+        conn.close()
 
-    user_id, username, password_hash = row
+        if not row:
+            raise HTTPException(status_code=401, detail="Invalid username or password")
 
-    if not pwd_context.verify(data.password, password_hash):
-        raise HTTPException(status_code=401, detail="Invalid username or password")
-
-    return {
-        "user": {
-            "user_id": user_id,
-            "username": username
+        user = {
+            "user_id": row[0],
+            "username": row[1],
+            "role": row[2]
         }
-    }
+
+        return {
+            "message": "Login successful",
+            "user": user
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        print("LOGIN ERROR:", e)
+        raise HTTPException(status_code=500, detail="Server error")
