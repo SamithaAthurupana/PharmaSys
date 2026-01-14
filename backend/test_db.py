@@ -6,4 +6,4 @@ if conn:
     print("SQL Server connected successfully")
     conn.close()
 else:
-    print("❌ Connection failed")
+    print("Connection failed")

@@ -12,18 +12,18 @@ def get_dashboard_stats():
 
     cursor = conn.cursor()
 
-    # ✅ TOTAL SALES (NO DATE FILTER — SAFE)
+    # TOTAL SALES (NO DATE FILTER — SAFE)
     cursor.execute("""
         SELECT ISNULL(SUM(total_amount), 0)
         FROM sales
     """)
     today_sales = cursor.fetchone()[0]
 
-    # ✅ TOTAL MEDICINES
+    # TOTAL MEDICINES
     cursor.execute("SELECT COUNT(*) FROM medicines")
     total_medicines = cursor.fetchone()[0]
 
-    # ✅ LOW STOCK
+    # LOW STOCK
     cursor.execute("""
         SELECT COUNT(*)
         FROM inventory i
@@ -32,7 +32,7 @@ def get_dashboard_stats():
     """)
     low_stock = cursor.fetchone()[0]
 
-    # ✅ EXPIRING SOON (SAFE NULL CHECK)
+    # EXPIRING SOON (SAFE NULL CHECK)
     cursor.execute("""
         SELECT COUNT(*)
         FROM medicines

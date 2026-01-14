@@ -6,14 +6,10 @@ from models.inventory_model import (
 
 router = APIRouter(prefix="/inventory", tags=["Inventory"])
 
-
-# ✅ GET inventory list
 @router.get("/")
 def get_inventory():
     return get_inventory_list()
 
-
-# ✅ UPDATE inventory quantity (THIS WAS MISSING)
 @router.put("/{medicine_id}")
 def update_inventory(medicine_id: int, quantity: int):
     success = update_inventory_quantity(medicine_id, quantity)

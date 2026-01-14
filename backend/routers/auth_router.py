@@ -5,18 +5,12 @@ from database import get_db_connection
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
-
-# -------------------------
 # Request model
-# -------------------------
 class LoginRequest(BaseModel):
     username: str
     password: str
 
-
-# -------------------------
 # LOGIN API
-# -------------------------
 @router.post("/login")
 def login(data: LoginRequest):
     try:

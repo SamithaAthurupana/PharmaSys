@@ -1,252 +1,238 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory - PharmaSys</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600&display=swap"
-        rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        :root {
-            --primary: #1E88E5;
-            --sidebar-width: 260px;
-        }
-        h1, h2, h3, .logo {
-            font-family: 'Poppins', sans-serif;
-        }
+        :root { --primary-color: #4361ee; --sidebar-width: 280px; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f4f7fe; color: #2b3674; }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #F5F7FA;
-        }
+        /* Sidebar */
+        .sidebar { width: var(--sidebar-width); height: 100vh; position: fixed; background: white; z-index: 1000; border-right: 1px solid #eef2f6; }
+        .logo-wrapper { padding: 2.5rem 1.5rem; font-weight: 800; font-size: 1.5rem; letter-spacing: -1px; color: var(--primary-color); }
+        .nav-link { color: #a3aed0; padding: 0.8rem 1.5rem; margin: 0.2rem 1rem; display: flex; align-items: center; border-radius: 12px; font-weight: 600; transition: 0.2s; text-decoration: none; }
+        .nav-link:hover { background: #f4f7fe; color: var(--primary-color); }
+        .nav-link.active { background: var(--primary-color); color: white !important; box-shadow: 0px 10px 20px rgba(67, 97, 238, 0.23); }
 
-        .sidebar {
-            width: var(--sidebar-width);
-            height: 100vh;
-            position: fixed;
-            background: #fff;
-            border-right: 1px solid #dee2e6;
-        }
+        /* Content */
+        .main-content { margin-left: var(--sidebar-width); padding: 2rem; }
+        .table-card { border: none; border-radius: 20px; background: white; box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.02); overflow: hidden; }
+        .table thead th { background-color: #f8f9fa; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; color: #a3aed0; border-bottom: none; padding: 1.2rem 1.5rem; }
+        .table tbody td { padding: 1.2rem 1.5rem; vertical-align: middle; border-bottom: 1px solid #f1f4f9; }
 
-        .nav-link {
-            color: #555;
-            padding: 12px 20px;
-            border-radius: 8px;
-            margin: 4px 15px;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
+        /* Badges */
+        .badge-soft { padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 0.8rem; display: inline-block; }
+        .bg-success-soft { background: #e6fffa; color: #38b2ac; }
+        .bg-danger-soft { background: #fff5f5; color: #e53e3e; }
+        .bg-warning-soft { background: #fffaf0; color: #dd6b20; }
 
-        .nav-link.active {
-            background: var(--primary);
-            color: #fff !important;
-        }
-
-        .main-content {
-            margin-left: var(--sidebar-width);
-            padding: 30px;
-        }
+        /* Modal */
+        .modal-content { border: none; border-radius: 24px; }
+        .form-control { border-radius: 12px; padding: 0.75rem 1rem; border: 1px solid #e0e5f2; }
+        
+        /* Stock Progress Bar */
+        .stock-progress { height: 6px; border-radius: 10px; background: #edf2f7; width: 100px; }
     </style>
 </head>
 
 <body>
 
-    <!-- LOGIN CHECK -->
-    <script>
-        const user = JSON.parse(localStorage.getItem("user"));
-        if (!user) window.location.href = "login.html";
-    </script>
-
-    <!-- SIDEBAR -->
     <div class="sidebar d-flex flex-column shadow-sm">
-        <div class="p-4">
-            <h4 class="logo text-primary">💊 PharmaSys</h4>
+        <div class="logo-wrapper"><i class="bi bi-capsule-pill me-2"></i>Pharma<span style="color: #2b3674;">Sys</span></div>
+        <nav class="nav flex-column flex-grow-1">
+            <a class="nav-link" href="dashboard.html"><i class="bi bi-grid-fill me-2"></i> Dashboard</a>
+            <a class="nav-link" href="pos.html"><i class="bi bi-cart3 me-2"></i> POS</a>
+            <a class="nav-link" href="medicine.html"><i class="bi bi-capsule me-2"></i> Medicines</a>
+            <a class="nav-link active" href="inventory.html"><i class="bi bi-archive me-2"></i> Inventory</a>
+            <a class="nav-link" href="employee.html"><i class="bi bi-people me-2"></i> Employees</a>
+            <a class="nav-link" href="prescription.html"><i class="bi bi-file-earmark-medical-fill me-2"></i> Prescriptions</a>
+            <a class="nav-link" href="reports.html"><i class="bi bi-graph-up-arrow me-2"></i> Reports</a>
+            <a class="nav-link" href="settings.html"><i class="bi bi-sliders me-2"></i> Settings</a>
+        </nav>
+        <div class="mt-auto p-4 border-top">
+            <button onclick="logout()"
+                class="btn btn-light text-danger w-100 fw-bold border-0 rounded-3">Logout</button>
         </div>
+</div>
 
-    <nav class="nav flex-column flex-grow-1">
-        <a class="nav-link" href="dashboard.html"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
-        <a class="nav-link" href="pos.html"><i class="bi bi-cart me-2"></i>POS</a>
-        <a class="nav-link" href="medicine.html"><i class="bi bi-capsule me-2"></i>Medicines</a>
-        <a class="nav-link active" href="inventory.html"><i class="bi bi-box-seam me-2"></i>Inventory</a>
-        <a class="nav-link" href="employee.html"><i class="bi bi-person-workspace me-2"></i>Employees</a>
-        <a class="nav-link" href="settings.html"><i class="bi bi-gear me-2"></i>Settings</a>
-    </nav>
-
-        <div class="p-3 border-top">
-            <button onclick="logout()" class="btn btn-outline-danger w-100">Logout</button>
+<div class="main-content">
+    <header class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h2 class="fw-bold mb-0">Inventory Tracking</h2>
+            <p class="text-muted small">Monitor stock levels, batches, and expiration dates</p>
         </div>
-    </div>
-
-    <!-- MAIN -->
-    <div class="main-content">
-        <h1 class="h3 fw-bold mb-4">Inventory Management</h1>
-
-        <div class="card shadow-sm">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="ps-4">Medicine</th>
-                            <th>Batch</th>
-                            <th>Expiry</th>
-                            <th>Quantity</th>
-                            <th>Status</th>
-                            <th class="text-end pe-4">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="inventoryTableBody"></tbody>
-                </table>
-            </div>
-            <div id="loadingSpinner" class="text-center p-4">
-                <div class="spinner-border text-primary"></div>
-            </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-white shadow-sm rounded-3 border-0 px-3" onclick="loadInventory()">
+                <i class="bi bi-arrow-clockwise"></i>
+            </button>
+            <button class="btn btn-primary px-4 shadow-sm rounded-pill fw-bold">
+                <i class="bi bi-download me-2"></i>Export Report
+            </button>
         </div>
-    </div>
+    </header>
 
-    <!-- UPDATE MODAL -->
-    <div class="modal fade" id="qtyModal">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5>Update Quantity</h5>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-
-                <div class="modal-body">
-                    <input type="hidden" id="invMedicineId">
-                    <label class="form-label">Quantity</label>
-                    <input type="number" id="invQuantity" class="form-control">
-                </div>
-
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button class="btn btn-primary" onclick="saveInventory()">Update</button>
-                </div>
-            </div>
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Medicine Name</th>
+                        <th>Batch / Lot</th>
+                        <th>Expiry Date</th>
+                        <th>Quantity</th>
+                        <th>Health Status</th>
+                        <th class="text-end pe-4">Manage</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryTableBody"></tbody>
+            </table>
+        </div>
+        <div id="loadingSpinner" class="text-center p-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted small">Fetching stock data...</p>
         </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<div class="modal fade" id="qtyModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-3 shadow-lg">
+            <div class="modal-header border-0">
+                <h5 class="fw-bold"><i class="bi bi-pencil-square me-2 text-primary"></i>Adjust Inventory</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="invMedicineId">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">New Stock Quantity</label>
+                    <input type="number" id="invQuantity" class="form-control form-control-lg" placeholder="Enter amount">
+                    <div class="form-text">Changing this will update the global stock for this medicine.</div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button class="btn btn-light px-4 rounded-pill fw-bold" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary px-4 rounded-pill fw-bold" onclick="saveInventory()">Update Stock</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <script>
-        const API_BASE = "http://127.0.0.1:8000";
-        const qtyModalEl = document.getElementById("qtyModal");
-        let qtyModal;
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-        function logout() {
-            localStorage.removeItem("user");
-            window.location.href = "login.html";
+<script>
+    const API_BASE = "http://127.0.0.1:8000";
+    let qtyModal;
+
+    const userCheck = JSON.parse(localStorage.getItem("user"));
+    if (!userCheck) window.location.href = "login.html";
+
+    function logout() {
+        localStorage.removeItem("user");
+        window.location.href = "login.html";
+    }
+
+    function getStatusHTML(m) {
+        const today = new Date();
+        const expiry = m.expiry_date ? new Date(m.expiry_date) : null;
+
+        if (expiry && expiry < today) {
+            return '<span class="badge-soft bg-danger-soft"><i class="bi bi-x-circle me-1"></i>Expired</span>';
         }
 
-        function getStatus(m) {
-            const today = new Date();
-            const expiry = m.expiry_date ? new Date(m.expiry_date) : null;
-
-            if (expiry && expiry < today) {
-                return '<span class="badge bg-danger">Expired</span>';
+        if (expiry) {
+            const diffDays = (expiry - today) / (1000 * 60 * 60 * 24);
+            if (diffDays <= 30) {
+                return '<span class="badge-soft bg-warning-soft"><i class="bi bi-clock-history me-1"></i>Expiring Soon</span>';
             }
-
-            if (expiry) {
-                const diffDays = (expiry - today) / (1000 * 60 * 60 * 24);
-                if (diffDays <= 30) {
-                    return '<span class="badge bg-warning text-dark">Expiring Soon</span>';
-                }
-            }
-
-            if (m.quantity <= m.reorder_level) {
-                return '<span class="badge bg-danger">Low Stock</span>';
-            }
-
-            return '<span class="badge bg-success">OK</span>';
         }
 
-        function openQtyModal(m) {
-            qtyModal = new bootstrap.Modal(qtyModalEl);
-            invMedicineId.value = m.medicine_id;
-            invQuantity.value = m.quantity;
-            qtyModal.show();
+        if (m.quantity <= m.reorder_level) {
+            return '<span class="badge-soft bg-danger-soft"><i class="bi bi-graph-down me-1"></i>Low Stock</span>';
         }
 
-        async function saveInventory() {
-            const id = invMedicineId.value;
-            const qty = parseInt(invQuantity.value);
+        return '<span class="badge-soft bg-success-soft"><i class="bi bi-check-circle me-1"></i>Healthy</span>';
+    }
 
-            if (qty < 0) {
-                alert("Quantity cannot be negative");
-                return;
-            }
+    function openQtyModal(m) {
+        qtyModal = new bootstrap.Modal(document.getElementById("qtyModal"));
+        document.getElementById("invMedicineId").value = m.medicine_id;
+        document.getElementById("invQuantity").value = m.quantity;
+        qtyModal.show();
+    }
 
-            const res = await fetch(`${API_BASE}/inventory/${id}?quantity=${qty}`, {
-                method: "PUT"
-            });
+    async function saveInventory() {
+        const id = document.getElementById("invMedicineId").value;
+        const qty = parseInt(document.getElementById("invQuantity").value);
 
-            if (!res.ok) {
-                const err = await res.json();
-                alert(err.detail || "Update failed");
-                return;
-            }
+        if (qty < 0) {
+            alert("Quantity cannot be negative");
+            return;
+        }
 
+        try {
+            const res = await fetch(`${API_BASE}/inventory/${id}?quantity=${qty}`, { method: "PUT" });
+            if (!res.ok) throw new Error("Update failed");
             qtyModal.hide();
             loadInventory();
+        } catch (err) {
+            alert("Failed to update inventory.");
         }
+    }
 
-        async function loadInventory() {
-            const body = document.getElementById("inventoryTableBody");
-            const spinner = document.getElementById("loadingSpinner");
+    async function loadInventory() {
+        const body = document.getElementById("inventoryTableBody");
+        const spinner = document.getElementById("loadingSpinner");
+        spinner.style.display = "block";
+        body.innerHTML = "";
 
-            try {
-                const res = await fetch(`${API_BASE}/inventory`);
-                const data = await res.json();
+        try {
+            const res = await fetch(`${API_BASE}/inventory`);
+            const data = await res.json();
+            spinner.style.display = "none";
 
-                spinner.style.display = "none";
-                body.innerHTML = "";
+            if (data.length === 0) {
+                body.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-muted">No inventory records found</td></tr>`;
+                return;
+            }
 
-                if (data.length === 0) {
-                    body.innerHTML = `
-                        <tr>
-                            <td colspan="6" class="text-center text-muted p-4">
-                                No inventory records found
-                            </td>
-                        </tr>`;
-                    return;
-                }
-
-                data.forEach(m => {
-                    body.innerHTML += `
-                        <tr>
-                            <td class="ps-4 fw-bold">${m.medicine_name}</td>
-                            <td>${m.batch_id || "-"}</td>
-                            <td>${m.expiry_date || "-"}</td>
-                            <td>${m.quantity}</td>
-                            <td>${getStatus(m)}</td>
-                            <td class="text-end pe-4">
-                                <button class="btn btn-sm btn-outline-primary"
-                                    onclick='openQtyModal(${JSON.stringify(m)})'>
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                            </td>
-                        </tr>`;
-                });
-
-            } catch (err) {
-                console.error(err);
-                spinner.style.display = "none";
-                body.innerHTML = `
+            data.forEach(m => {
+                const stockColor = m.quantity <= m.reorder_level ? 'bg-danger' : 'bg-primary';
+                body.innerHTML += `
                     <tr>
-                        <td colspan="6" class="text-center text-danger p-4">
-                            Failed to load inventory
+                        <td class="ps-4">
+                            <div class="fw-bold">${m.medicine_name}</div>
+                            <div class="text-muted small">ID: #${m.medicine_id}</div>
+                        </td>
+                        <td><code class="text-primary fw-bold">${m.batch_id || "N/A"}</code></td>
+                        <td><span class="fw-medium">${m.expiry_date || "—"}</span></td>
+                        <td>
+                            <div class="fw-bold">${m.quantity} Units</div>
+                            <div class="stock-progress mt-1">
+                                <div class="progress-bar ${stockColor}" style="width: ${Math.min((m.quantity/100)*100, 100)}%; height: 6px; border-radius: 10px;"></div>
+                            </div>
+                        </td>
+                        <td>${getStatusHTML(m)}</td>
+                        <td class="text-end pe-4">
+                            <button class="btn btn-light btn-sm rounded-circle" 
+                                onclick='openQtyModal(${JSON.stringify(m)})'>
+                                <i class="bi bi-pencil-fill text-primary"></i>
+                            </button>
                         </td>
                     </tr>`;
-            }
+            });
+        } catch (err) {
+            spinner.style.display = "none";
+            body.innerHTML = `<tr><td colspan="6" class="text-center text-danger py-5">Connection to API failed.</td></tr>`;
         }
+    }
 
-        loadInventory();
-    </script>
-
+    window.onload = loadInventory;
+</script>
 </body>
 </html>

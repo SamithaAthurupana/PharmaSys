@@ -1,106 +1,285 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings - PharmaSys</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
     <style>
-        :root { --primary-color: #1E88E5; --sidebar-width: 260px; }
-        body { font-family: 'Inter', sans-serif; background-color: #F5F7FA; }
-        h1, h2, h3, .logo-text { font-family: 'Poppins', sans-serif; }
+        :root {
+            --primary-color: #4361ee;
+            --sidebar-width: 280px;
+        }
 
-        .sidebar { width: var(--sidebar-width); height: 100vh; position: fixed; background: white; border-right: 1px solid #dee2e6; z-index: 1000; }
-        .nav-link-custom { color: #555; padding: 12px 20px; border-radius: 8px; margin: 4px 15px; display: block; text-decoration: none; transition: all 0.2s; }
-        .nav-link-custom.active { background-color: var(--primary-color); color: white !important; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f4f7fe;
+            color: #2b3674;
+        }
 
-        .main-content { margin-left: var(--sidebar-width); padding: 40px; width: calc(100% - var(--sidebar-width)); }
-        .settings-card { background: white; border: none; border-radius: 15px; overflow: hidden; }
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            background: white;
+            z-index: 1000;
+            border-right: 1px solid #eef2f6;
+        }
 
-        .settings-nav-group .list-group-item { padding: 1.2rem 1.5rem; border: none; border-left: 4px solid transparent; font-size: 0.95rem; font-weight: 500; color: #666; cursor: pointer; }
-        .settings-nav-group .list-group-item.active { background-color: #F0F7FF; color: var(--primary-color); border-left-color: var(--primary-color); }
-        
-        /* Animation for tab switching */
-        .settings-pane { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .logo-wrapper {
+            padding: 2.5rem 1.5rem;
+            font-weight: 800;
+            font-size: 1.5rem;
+            letter-spacing: -1px;
+            color: var(--primary-color);
+        }
 
-        @media (max-width: 992px) { .sidebar { margin-left: -var(--sidebar-width); } .main-content { margin-left: 0; width: 100%; } }
+        .nav-link {
+            color: #a3aed0;
+            padding: 0.8rem 1.5rem;
+            margin: 0.2rem 1rem;
+            display: flex;
+            align-items: center;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: 0.2s;
+            text-decoration: none;
+        }
+
+        .nav-link:hover {
+            background: #f4f7fe;
+            color: var(--primary-color);
+        }
+
+        .nav-link.active {
+            background: var(--primary-color);
+            color: white !important;
+            box-shadow: 0px 10px 20px rgba(67, 97, 238, 0.15);
+        }
+
+        /* Main Layout */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2.5rem;
+        }
+
+        .settings-card {
+            border: none;
+            border-radius: 24px;
+            background: white;
+            box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.03);
+            overflow: hidden;
+        }
+
+        /* Vertical Tabs */
+        .settings-nav-group {
+            background: #f8fafc;
+            height: 100%;
+            padding-top: 1rem;
+        }
+
+        .list-group-item {
+            background: transparent !important;
+            border: none !important;
+            padding: 1.25rem 1.5rem;
+            color: #718096;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .list-group-item i {
+            font-size: 1.2rem;
+            margin-right: 12px;
+        }
+
+        .list-group-item.active {
+            color: var(--primary-color) !important;
+            position: relative;
+        }
+
+        .list-group-item.active::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 20%;
+            height: 60%;
+            width: 4px;
+            background: var(--primary-color);
+            border-radius: 4px 0 0 4px;
+        }
+
+        /* Forms */
+        .form-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #a3aed0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            font-weight: 500;
+        }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .settings-pane {
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .backup-icon {
+            font-size: 2.5rem;
+            color: #cbd5e0;
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 
 <body>
 
     <div class="sidebar d-flex flex-column shadow-sm">
-        <div class="p-4"><h4 class="logo-text text-primary m-0">💊 PharmaSys</h4></div>
-        <nav class="flex-column">
-            <a class="nav-link-custom" href="dashboard.html"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
-            <a class="nav-link-custom" href="pos.html"><i class="bi bi-cart me-2"></i> POS</a>
-            <a class="nav-link-custom" href="medicine.html"><i class="bi bi-capsule me-2"></i> Medicines</a>
-            <a class="nav-link-custom" href="inventory.html"><i class="bi bi-box-seam me-2"></i> Inventory</a>
-            <a class="nav-link-custom" href="employee.html"><i class="bi bi-person-workspace me-2"></i>Employees</a>
-            <a class="nav-link-custom active" href="settings.html"><i class="bi bi-gear me-2"></i> Settings</a>
+        <div class="logo-wrapper"><i class="bi bi-capsule-pill me-2"></i>Pharma<span style="color: #2b3674;">Sys</span>
+        </div>
+        <nav class="nav flex-column flex-grow-1">
+            <a class="nav-link" href="dashboard.html"><i class="bi bi-grid-fill me-2"></i> Dashboard</a>
+            <a class="nav-link" href="pos.html"><i class="bi bi-cart3 me-2"></i> POS</a>
+            <a class="nav-link" href="medicine.html"><i class="bi bi-capsule me-2"></i> Medicines</a>
+            <a class="nav-link" href="inventory.html"><i class="bi bi-archive me-2"></i> Inventory</a>
+            <a class="nav-link" href="employee.html"><i class="bi bi-people me-2"></i> Employees</a>
+            <a class="nav-link" href="prescription.html"><i class="bi bi-file-earmark-medical-fill me-2"></i>
+                Prescriptions</a>
+            <a class="nav-link" href="reports.html"><i class="bi bi-graph-up-arrow me-2"></i> Reports</a>
+            <a class="nav-link active" href="settings.html"><i class="bi bi-sliders me-2"></i> Settings</a>
         </nav>
+        <div class="mt-auto p-4 border-top">
+            <button onclick="logout()"
+                class="btn btn-light text-danger w-100 fw-bold border-0 rounded-3">Logout</button>
+        </div>
     </div>
 
     <div class="main-content">
-        <header class="mb-4">
-            <h1 class="h3 fw-bold m-0">System Configuration</h1>
-            <p class="text-muted">Manage your pharmacy profiles and system preferences.</p>
+        <header class="mb-5">
+            <h2 class="fw-bold mb-1">System Configuration</h2>
+            <p class="text-muted small">Manage organizational identity and security protocols</p>
         </header>
 
-        <div class="card settings-card shadow-sm">
+        <div class="settings-card shadow-sm">
             <div class="row g-0">
-                <div class="col-md-3 border-end bg-light-subtle">
+                <div class="col-md-3 border-end">
                     <div class="list-group list-group-flush settings-nav-group" id="settingsTabs">
-                        <div class="list-group-item active" data-target="profile"><i class="bi bi-building me-2"></i> Pharmacy Profile</div>
-                        <div class="list-group-item" data-target="security"><i class="bi bi-shield-lock me-2"></i> Roles & Security</div>
-                        <div class="list-group-item" data-target="backup"><i class="bi bi-cloud-arrow-up me-2"></i> Backup & Restore</div>
+                        <a href="#" class="list-group-item active" data-target="profile">
+                            <i class="bi bi-building"></i> Pharmacy Profile
+                        </a>
+                        <a href="#" class="list-group-item" data-target="security">
+                            <i class="bi bi-shield-lock"></i> Roles & Security
+                        </a>
+                        <a href="#" class="list-group-item" data-target="backup">
+                            <i class="bi bi-cloud-arrow-up"></i> Backup & Restore
+                        </a>
                     </div>
                 </div>
 
                 <div class="col-md-9">
-                    <div class="card-body p-5">
+                    <div class="card-body p-lg-5">
+
                         <div id="pane-profile" class="settings-pane">
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <h3 class="h5 fw-bold mb-0">Pharmacy Profile</h3>
-                                <span class="badge bg-info-subtle text-info px-3 py-2 rounded-pill">Status: Online</span>
+                            <div class="d-flex justify-content-between align-items-center mb-5">
+                                <h4 class="fw-bold mb-0">Pharmacy Profile</h4>
+                                <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill fw-bold">System
+                                    Online</span>
                             </div>
-                            
+
                             <div class="row g-4">
-                                <div class="col-md-12">
-                                    <div class="form-floating">
-                                        <input type="text" class="form-control" id="pharmName" value="City Care Pharmacy">
-                                        <label>Pharmacy Name</label>
-                                    </div>
+                                <div class="col-12">
+                                    <label class="form-label">Full Pharmacy Name</label>
+                                    <input type="text" class="form-control" id="pharmName"
+                                        value="City Care Pharmacy & Wellness">
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="form-floating">
-                                        <input type="email" class="form-control" id="pharmEmail" value="admin@citycare.com">
-                                        <label>Contact Email</label>
-                                    </div>
+                                    <label class="form-label">Administration Email</label>
+                                    <input type="email" class="form-control" id="pharmEmail" value="admin@citycare.com">
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="form-floating">
-                                        <input type="text" class="form-control" id="licenseNo" value="DL-2026-X99">
-                                        <label>Drug License Number</label>
-                                    </div>
+                                    <label class="form-label">Drug License Number</label>
+                                    <input type="text" class="form-control" id="licenseNo" value="DL-2026-X99">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Physical Address</label>
+                                    <textarea class="form-control"
+                                        rows="2">123 Medical Avenue, Healthcare District, 20260</textarea>
                                 </div>
                             </div>
 
                             <div class="mt-5 pt-4 border-top">
-                                <button onclick="saveSettings()" class="btn btn-primary px-5 py-2 fw-bold shadow-sm">
-                                    <i class="bi bi-check2-circle me-2"></i>Save Changes
+                                <button onclick="saveSettings(event)"
+                                    class="btn btn-primary px-5 py-2 fw-bold rounded-pill shadow-sm">
+                                    Update Configuration
                                 </button>
                             </div>
                         </div>
 
                         <div id="pane-security" class="settings-pane d-none">
-                            <h3 class="h5 fw-bold mb-4">Roles & Security</h3>
-                            <p class="text-muted">Security settings are currently managed by the administrator.</p>
+                            <h4 class="fw-bold mb-4">Roles & Security</h4>
+                            <div class="p-5 text-center bg-light rounded-4 border border-dashed">
+                                <i class="bi bi-lock backup-icon"></i>
+                                <p class="text-muted fw-medium mb-0">Role management is restricted to Super Admin access
+                                    only.</p>
+                                <button class="btn btn-outline-primary btn-sm mt-3 px-4 fw-bold">Request Access</button>
+                            </div>
                         </div>
+
+                        <div id="pane-backup" class="settings-pane d-none">
+                            <h4 class="fw-bold mb-4">Data Recovery</h4>
+                            <div class="card border border-light-subtle rounded-4 p-4 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary-subtle text-primary p-3 rounded-4 me-4">
+                                        <i class="bi bi-cloud-check-fill fs-3"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Cloud Backup Status</h6>
+                                        <p class="text-muted small mb-0">Last automatic snapshot: Today at 02:00 AM</p>
+                                    </div>
+                                    <button class="btn btn-light fw-bold ms-auto px-4 rounded-pill border">Manual
+                                        Backup</button>
+                                </div>
+                            </div>
+                            <div class="card border-danger-subtle bg-danger-subtle bg-opacity-10 rounded-4 p-4">
+                                <h6 class="fw-bold text-danger">Database Restoration</h6>
+                                <p class="small text-muted">Restoring an old backup will overwrite all current sales and
+                                    inventory data. This action is irreversible.</p>
+                                <button class="btn btn-danger btn-sm px-4 fw-bold rounded-pill">Restore
+                                    Database</button>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -108,45 +287,43 @@
     </div>
 
     <script>
-        const API_BASE = "http://127.0.0.1:8000";
-
         // Tab Switching Logic
         document.querySelectorAll('#settingsTabs .list-group-item').forEach(tab => {
-            tab.addEventListener('click', function() {
-                // Update Sidebar
+            tab.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                // Active Sidebar Tab
                 document.querySelectorAll('#settingsTabs .list-group-item').forEach(t => t.classList.remove('active'));
                 this.classList.add('active');
 
-                // Update Panes
+                // Toggle Content Panes
                 const target = this.getAttribute('data-target');
                 document.querySelectorAll('.settings-pane').forEach(pane => pane.classList.add('d-none'));
                 document.getElementById(`pane-${target}`).classList.remove('d-none');
             });
         });
 
-        // Save Function Logic
-        async function saveSettings() {
-            const settingsData = {
-                name: document.getElementById("pharmName").value,
-                email: document.getElementById("pharmEmail").value,
-                license: document.getElementById("licenseNo").value
-            };
+        // Feedback Logic
+        async function saveSettings(e) {
+            const btn = e.currentTarget;
+            const originalText = btn.innerHTML;
 
-            console.log("Saving to API:", settingsData);
-            
-            // Visual feedback
-            const btn = event.currentTarget;
-            const originalHtml = btn.innerHTML;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Syncing...';
             btn.disabled = true;
 
-            // Simulate API Call
+            // Simulate local storage / API save
             setTimeout(() => {
-                btn.innerHTML = originalHtml;
-                btn.disabled = false;
-                alert(`SUCCESS:\nPharmacy: ${settingsData.name}\nEmail: ${settingsData.email}\nChanges updated successfully!`);
-            }, 800);
+                btn.innerHTML = 'Saved Successfully!';
+                btn.classList.replace('btn-primary', 'btn-success');
+
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.replace('btn-success', 'btn-primary');
+                    btn.disabled = false;
+                }, 2000);
+            }, 1200);
         }
     </script>
 </body>
+
 </html>
