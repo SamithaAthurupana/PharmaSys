@@ -15,14 +15,8 @@
     --primary:#1E88E5;
     --sidebar-width:260px;
 }
-
-body{
-    font-family:'Inter',sans-serif;
-    background:#F8F9FB;
-}
-
+body{ font-family:'Inter',sans-serif; background:#F8F9FB; }
 .logo-text{ font-family:'Poppins',sans-serif; }
-
 .sidebar{
     width:var(--sidebar-width);
     height:100vh;
@@ -30,24 +24,14 @@ body{
     background:#fff;
     border-right:1px solid #dee2e6;
 }
-
 .nav-link{
     color:#555;
     padding:12px 20px;
     border-radius:8px;
     margin:4px 15px;
 }
-
-.nav-link.active{
-    background:var(--primary);
-    color:#fff !important;
-}
-
-.main-content{
-    margin-left:var(--sidebar-width);
-    padding:20px;
-}
-
+.nav-link.active{ background:var(--primary); color:#fff !important; }
+.main-content{ margin-left:var(--sidebar-width); padding:20px; }
 .qty-input{ width:70px; }
 .cart-scroll{ max-height:350px; overflow-y:auto; }
 .remove-btn{ cursor:pointer; color:#dc3545; }
@@ -68,7 +52,6 @@ if(!user) window.location.href="login.html";
     <div class="p-4">
         <h4 class="logo-text text-primary m-0">💊 PharmaSys</h4>
     </div>
-
     <nav class="nav flex-column flex-grow-1">
         <a class="nav-link" href="dashboard.html">Dashboard</a>
         <a class="nav-link active" href="pos.html">POS</a>
@@ -77,19 +60,17 @@ if(!user) window.location.href="login.html";
         <a class="nav-link" href="employee.html">Employees</a>
         <a class="nav-link" href="settings.html">Settings</a>
     </nav>
-
     <div class="p-3 border-top">
         <button onclick="logout()" class="btn btn-outline-danger w-100">Logout</button>
     </div>
 </div>
 
-<!-- MAIN CONTENT -->
+<!-- MAIN -->
 <div class="main-content">
 
-<!-- HEADER -->
 <nav class="navbar navbar-light bg-white shadow-sm rounded px-4 mb-3">
     <span class="navbar-brand logo-text fw-bold">POS</span>
-    <span class="text-muted">User: <strong>${user.username}</strong></span>
+    <span class="text-muted">User: <strong id="userName"></strong></span>
 </nav>
 
 <div class="row">
@@ -97,7 +78,6 @@ if(!user) window.location.href="login.html";
 <!-- MEDICINES -->
 <div class="col-md-8">
     <input class="form-control mb-3" id="searchInput" placeholder="Search medicine by name">
-
     <div class="card shadow-sm">
         <table class="table mb-0">
             <thead class="table-light">
@@ -177,6 +157,154 @@ if(!user) window.location.href="login.html";
 </div>
 
 <script>
+document.addEventListener("DOMContentLoaded", () => {
+
+const API = "http://127.0.0.1:8000";
+document.getElementById("userName").innerText = user.username;
+
+let medicines = [];
+let cart = [];
+
+const medicineTable = document.getElementById("medicineTable");
+const searchInput = document.getElementById("searchInput");
+const cartBody = document.getElementById("cartBody");
+const cartCount = document.getElementById("cartCount");
+const subtotalEl = document.getElementById("subtotal");
+const discountEl = document.getElementById("discount");
+const totalEl = document.getElementById("total");
+const payBtn = document.getElementById("payBtn");
+const printBtn = document.getElementById("printBtn");
+
+/* LOAD MEDICINES (SAME SOURCE AS MEDICINE PAGE) */
+async function loadMedicines(){
+    const res = await fetch(`${API}/inventory`);
+    medicines = await res.json();
+    renderMedicines(medicines);
+}
+
+function renderMedicines(list){
+    medicineTable.innerHTML = "";
+    list.forEach(m => {
+        medicineTable.innerHTML += `
+        <tr>
+            <td>${m.medicine_name}</td>
+            <td>${m.batch_id || "-"}</td>
+            <td><span class="badge bg-success">${m.quantity}</span></td>
+            <td>Rs. ${Number(m.price).toFixed(2)}</td>
+            <td>
+                <input type="number" min="1" max="${m.quantity}" value="1"
+                       id="qty_${m.medicine_id}" class="form-control qty-input">
+            </td>
+            <td>
+                <button class="btn btn-primary btn-sm" onclick="addToCart(${m.medicine_id})">
+                    Add +
+                </button>
+            </td>
+        </tr>`;
+    });
+}
+
+/* SEARCH */
+searchInput.addEventListener("input", e=>{
+    const t = e.target.value.toLowerCase();
+    renderMedicines(medicines.filter(m=>m.medicine_name.toLowerCase().includes(t)));
+});
+
+/* CART LOGIC */
+window.addToCart = function(id){
+    const med = medicines.find(m=>m.medicine_id===id);
+    const qty = parseInt(document.getElementById(`qty_${id}`).value);
+
+    if(qty<=0 || qty>med.quantity) return alert("Invalid quantity");
+
+    const item = cart.find(i=>i.medicine_id===id);
+    if(item) item.quantity += qty;
+    else cart.push({ medicine_id:id, name:med.medicine_name, price:med.price, quantity:qty });
+
+    updateCart();
+}
+
+window.removeItem = function(id){
+    cart = cart.filter(i=>i.medicine_id!==id);
+    updateCart();
+}
+
+function updateCart(){
+    cartBody.innerHTML = "";
+    if(cart.length===0){
+        cartBody.innerText="Cart is empty";
+        payBtn.disabled = printBtn.disabled = true;
+    }else{
+        cart.forEach(i=>{
+            cartBody.innerHTML += `
+            <div class="d-flex justify-content-between mb-2">
+                <div>${i.name} x ${i.quantity}</div>
+                <div>
+                    Rs. ${(i.price*i.quantity).toFixed(2)}
+                    <span class="remove-btn" onclick="removeItem(${i.medicine_id})">✖</span>
+                </div>
+            </div>`;
+        });
+        payBtn.disabled = printBtn.disabled = false;
+    }
+
+    const subtotal = cart.reduce((s,i)=>s+i.price*i.quantity,0);
+    const discount = subtotal*0.05;
+    const total = subtotal-discount;
+
+    subtotalEl.innerText=`Rs. ${subtotal.toFixed(2)}`;
+    discountEl.innerText=`- Rs. ${discount.toFixed(2)}`;
+    totalEl.innerText=`Rs. ${total.toFixed(2)}`;
+    cartCount.innerText=cart.length;
+}
+
+/* PRINT (FULL VERSION) */
+window.printInvoice = function(){
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.text("PharmaSys Pharmacy",20,20);
+    let y=40;
+    cart.forEach(i=>{
+        doc.text(`${i.name} x ${i.quantity} = Rs.${(i.price*i.quantity).toFixed(2)}`,20,y);
+        y+=8;
+    });
+    doc.save("invoice.pdf");
+}
+
+/* PAY */
+window.payNow = async function(){
+    const subtotal = cart.reduce((s,i)=>s+i.price*i.quantity,0);
+    const discount = subtotal*0.05;
+    const total = subtotal-discount;
+
+    const payload = {
+        user_id: user.user_id,
+        discount,
+        total_amount: total,
+        items: cart
+    };
+
+    const res = await fetch(`${API}/sales`,{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify(payload)
+    });
+
+    if(!res.ok) return alert("Payment failed");
+
+    showThankYouPopup();
+    cart=[];
+    updateCart();
+    loadMedicines();
+}
+
+/* MODAL */
+window.showThankYouPopup = ()=>document.getElementById("thankYouModal").classList.add("show");
+window.closeThankYou = ()=>document.getElementById("thankYouModal").classList.remove("show");
+
+loadMedicines();
+});
+
 function logout(){
     localStorage.removeItem("user");
     window.location.href="login.html";
