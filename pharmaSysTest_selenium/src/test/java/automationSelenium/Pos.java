@@ -10,30 +10,34 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 
-public class Reports {
+public class Pos {
     public static void main(String[] args) {
+
         WebDriverManager.edgedriver().setup();
         WebDriver driver = new EdgeDriver();
-        // open the login page
+
+        // Logging Application
         driver.manage().window().maximize();
         driver.get("http://127.0.0.1:5500/frontend/login.html");
-        // fill the login user form
         WebElement usernameTextBox = driver.findElement(By.id("username"));
         usernameTextBox.sendKeys("admin");
         WebElement passwordTextBox = driver.findElement(By.id("password"));
         passwordTextBox.sendKeys("admin123");
         WebElement loginButton = driver.findElement(By.id("loginBtn"));
         loginButton.click();
-
         // Wait until dashboard loads
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         wait.until(ExpectedConditions.urlContains("dashboard"));
-        // Open reports page
-        driver.manage().window().maximize();
-        driver.get("http://127.0.0.1:5500/frontend/reports.html");
 
-        // check print function
-        WebElement printBtn = wait.until(ExpectedConditions.elementToBeClickable(By.className("px-4")));
-        printBtn.click();
+        // Open POS page
+        driver.get("http://127.0.0.1:5500/frontend/pos.html");
+        // Redirect
+        WebElement actionButton = driver.findElement(By.className("bi-plus-lg"));
+        actionButton.click();
+        // Redirect
+        WebElement printOption = driver.findElement(By.id("printBtn"));
+        printOption.click();
+        WebElement payButton = driver.findElement(By.id("payBtn"));
+        payButton.click();
     }
 }
